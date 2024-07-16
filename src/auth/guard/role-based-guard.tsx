@@ -3,7 +3,7 @@
 import { Typography } from "antd";
 import { m } from "framer-motion";
 import { useAuthContext } from "../hooks";
-import { varBounce } from "@/src/shared/animate";
+import { varBounce } from "@/app/components/shared/animate";
 
 // ----------------------------------------------------------------------
 

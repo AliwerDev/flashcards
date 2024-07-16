@@ -1,11 +1,11 @@
 import { message } from "antd";
 import axios, { AxiosRequestConfig } from "axios";
 import isArray from "lodash.isarray";
-const HOST_API = process.env.HOST_API;
+import { config } from "../config";
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API });
+const axiosInstance = axios.create({ baseURL: config.app.HOST_API });
 
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -14,10 +14,6 @@ axiosInstance.interceptors.response.use(
       typeof error.response.data.message === "string" && message.error(error.response.data.message);
       isArray(error.response.data.message) && error.response.data.message.forEach((value: string) => message.error(value));
     }
-    // const errorMessage = (error.response && error.response.data) || "Something went wrong";
-
-    // message.error(errorMessage);
-
     return Promise.reject();
   }
 );

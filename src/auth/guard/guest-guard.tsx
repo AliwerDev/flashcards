@@ -3,7 +3,7 @@ import { useEffect, useCallback } from "react";
 
 import { paths } from "@/src/routes/paths";
 import { useAuthContext } from "../hooks";
-import { SplashScreen } from "@/src/shared/loading-screen";
+import { SplashScreen } from "@/app/components/shared/loading-screen";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/src/routes/hooks";
 
@@ -11,21 +11,22 @@ import { useRouter } from "@/src/routes/hooks";
 
 type Props = {
   children: React.ReactNode;
+  lang: string;
 };
 
-export default function GuestGuard({ children }: Props) {
+export default function GuestGuard({ children, lang }: Props) {
   const { loading } = useAuthContext();
 
-  return <>{loading ? <SplashScreen /> : <Container>{children}</Container>}</>;
+  return <>{loading ? <SplashScreen /> : <Container lang={lang}>{children}</Container>}</>;
 }
 
 // ----------------------------------------------------------------------
 
-function Container({ children }: Props) {
+function Container({ children, lang }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const returnTo = searchParams.get("returnTo") || paths.dashboard.root;
+  const returnTo = searchParams.get("returnTo") || paths.dashboard.root(lang);
   const { authenticated } = useAuthContext();
 
   const check = useCallback(() => {
