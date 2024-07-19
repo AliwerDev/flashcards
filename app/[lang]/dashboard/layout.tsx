@@ -3,7 +3,7 @@
 import React, { ReactNode } from "react";
 import { MoonOutlined, SunOutlined } from "@ant-design/icons";
 import { BsLayoutSidebar, BsLayoutSidebarReverse } from "react-icons/bs";
-import { Button, Drawer, Flex, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Button, Drawer, Flex, Layout, Menu, theme } from "antd";
 import { useSettingsContext } from "@/src/settings/hooks";
 import { useDashboardMenus } from "@/src/hooks/use-dashboard-menus";
 import { LanguageElements } from "@/app/components/dashboard/language";
@@ -55,10 +55,12 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
           }}
-          trigger={null}
           collapsible
+          theme={apptheme}
+          onCollapse={() => updateData({ sidebar_collapsed: !sidebar_collapsed })}
           className="hidden md:block"
           collapsed={sidebar_collapsed}
+          zeroWidthTriggerStyle={{ background: colorBgContainer, borderRadius: borderRadiusLG }}
         >
           {logo}
           <Menu
@@ -74,8 +76,7 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
         </Sider>
         <Layout>
           <Header style={{ paddingInline: "16px", background: colorBgContainer, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Button type="text" icon={!sidebar_collapsed ? <BsLayoutSidebar /> : <BsLayoutSidebarReverse />} onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} />
-
+            <Breadcrumb items={[{ title: "Dashboard", href: "/" }]} />
             <Flex gap="15px" align="center">
               <LanguageElements lang={lang} />
               <Button type="text" icon={apptheme == "dark" ? <SunOutlined /> : <MoonOutlined />} onClick={() => changeMode(apptheme == "dark" ? "light" : "dark")} />
@@ -87,7 +88,7 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             style={{
               padding: 24,
               minHeight: 280,
-              background: colorBgContainer,
+              // background: colorBgContainer,
             }}
           >
             {children}

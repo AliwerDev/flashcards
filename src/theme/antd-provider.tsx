@@ -20,27 +20,24 @@ const AntdProvider = ({ children, lang }: Props) => {
       // @ts-ignore
       locale={lang === "en" ? en_US : ru_RU}
       theme={{
-        token: {
-          colorPrimary: isDarkMode ? "#73C0FF" : "#1A79C6",
-          colorBorder: isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#00000010",
-          colorPrimaryBg: isDarkMode ? "#121212" : "#FFFFFF",
-          colorText: isDarkMode ? "#E0E0E0" : "#333333",
-        },
+        token: isDarkMode
+          ? {
+              colorSuccess: "#53c61b",
+              colorPrimary: "#52c41a",
+              colorInfo: "#13c2c2",
+              colorBgBase: "#000000",
+              borderRadius: 4,
+              wireframe: false,
+            }
+          : {
+              colorSuccess: "#53c61b",
+              colorPrimary: "#52c41a",
+              colorInfo: "#13c2c2",
+              colorBgBase: "#f3f5f1",
+              borderRadius: 4,
+              wireframe: false,
+            },
         algorithm: isDarkMode ? [theme.darkAlgorithm] : [theme.defaultAlgorithm],
-        components: {
-          Menu: {
-            itemPaddingInline: "12px",
-          },
-          Table: {
-            rowSelectedBg: "transparent",
-            rowSelectedHoverBg: "transparent",
-            headerColor: isDarkMode ? "#ffffff40" : "#1C1C1C40",
-            headerSplitColor: "transparent",
-          },
-          Modal: {
-            motion: false,
-          },
-        },
       }}
     >
       <StyleProvider hashPriority="low">{children}</StyleProvider>
