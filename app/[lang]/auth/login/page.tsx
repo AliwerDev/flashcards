@@ -1,25 +1,52 @@
 "use client";
 import React from "react";
-import { Form, Input, Button, theme } from "antd";
+import { Form, Input, Button, theme, Divider, message } from "antd";
 import { LuUser, LuLock } from "react-icons/lu";
 import Link from "next/link";
 import { paths } from "@/src/routes/paths";
 import { useAuthContext } from "@/src/auth/hooks";
+import { useGoogleLogin, useGoogleOneTapLogin, googleLogout } from "@react-oauth/google";
+import { BsGoogle } from "react-icons/bs";
+import { useBoolean } from "@/src/hooks/use-boolean";
+import { useTranslation } from "@/app/i18/client";
 
 type Props = {
   params: { lang: string };
 };
 
 export default function LoginPage({ params: { lang } }: Props) {
-  const { login } = useAuthContext();
+  const { t } = useTranslation(lang);
+  const { login, loginByGoogle } = useAuthContext();
+  const loadingBool = useBoolean();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const onFinish = (values: any) => {
-    login(values);
+  const onFinish = async (values: any) => {
+    loadingBool.onTrue();
+    login(values).finally(() => loadingBool.onFalse());
   };
+
+  const loginWithgoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      googleLogout();
+      loginByGoogle({ access_token: tokenResponse.access_token as string });
+    },
+    onError: () => {
+      message.error("Login Failed");
+    },
+  });
+
+  useGoogleOneTapLogin({
+    onSuccess: (credentialResponse) => {
+      googleLogout();
+      loginByGoogle({ credential: credentialResponse.credential as string });
+    },
+    onError: () => {
+      message.error("Login Failed");
+    },
+  });
 
   return (
     <div style={{ background: colorBgContainer, borderRadius: borderRadiusLG }} className="w-full max-w-md p-8 shadow-md">
@@ -50,17 +77,25 @@ export default function LoginPage({ params: { lang } }: Props) {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" className="w-full text-white p-2 rounded">
-            Log in
+          <Button loading={loadingBool.value} type="primary" htmlType="submit" className="w-full text-white p-2 rounded">
+            {t("Log in")}
           </Button>
           <div className="text-center mt-4">
-            Don't have an account?
+            {t("Don't have an account")}?
             <Link href={paths.auth.register(lang)} className="text-blue-500 ml-2">
-              Register now!
+              {t("Register now")}!
             </Link>
           </div>
         </Form.Item>
       </Form>
+
+      <Divider className="my-4" orientation="center" plain>
+        {t("or")}
+      </Divider>
+
+      <Button onClick={() => loginWithgoogle()} type="dashed" size="large" icon={<BsGoogle />} className="w-full">
+        {t("Continue with Google")}
+      </Button>
     </div>
   );
 }

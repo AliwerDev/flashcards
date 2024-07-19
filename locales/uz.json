@@ -1,0 +1,15 @@
+{
+  "level": "Daraja",
+  "min": "daq",
+  "review-interval": "Ko'rib chiqish oralig'i",
+  "Create new box": "Yangi box yaratish",
+  "successfully_created": "Muvaffaqqiyatli yaratildi!",
+  "review-interval-in-minues": "Ko'rib chiqish oralig'i daqiqalarda",
+  "successfully_deleted": "Muvaffaqqiyatli o'chirildi!",
+  "sec": "sec",
+  "hour": "soat",
+  "day": "kun",
+  "week": "hafta",
+  "month": "oy",
+  "yes": "Ha"
+}

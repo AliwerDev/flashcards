@@ -1,0 +1,20 @@
+{
+  "level": "Level",
+  "min": "min",
+  "cards_count": "Cards count",
+  "review-interval": "Review interval",
+  "Create new box": "Create new box",
+  "cancel": "Cancel",
+  "save": "Save",
+  "successfully_created": "Successfully created!",
+  "review-interval-in-minues": "Review interval in minues",
+  "successfully_deleted": "Successfully delated!",
+  "sec": "sec",
+  "hour": "hour",
+  "day": "day",
+  "week": "week",
+  "month": "month",
+  "Are you sure you want to remove": "Are you sure you want to remove?",
+  "Are you sure you want to delete": "Are you sure you want to delete?",
+  "yes": "Yes"
+}

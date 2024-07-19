@@ -4,7 +4,7 @@ import axios, { endpoints } from "@/src/utils/axios";
 
 import { AuthContext } from "./auth-context";
 import { setStorage } from "./utils";
-import { AuthUserType, AuthStateType, LoginDataType, RegisterDataType, ActionMapType } from "../types";
+import { AuthUserType, AuthStateType, LoginDataType, RegisterDataType, ActionMapType, LoginByGoogleDataType } from "../types";
 import { config } from "@/src/config";
 
 enum Types {
@@ -128,6 +128,24 @@ export function AuthProvider({ children }: Props) {
     });
   }, []);
 
+  // LOGIN
+  const loginByGoogle = useCallback(async (data: LoginByGoogleDataType) => {
+    const res = await axios.post(endpoints.auth.loginByGoogle, data);
+
+    const { token } = get(res, "data", {});
+    setStorage(token);
+    initialize();
+
+    dispatch({
+      type: Types.LOGIN,
+      payload: {
+        user: {
+          accessToken: token,
+        },
+      },
+    });
+  }, []);
+
   // REGISTER
   const register = useCallback(async (data: RegisterDataType) => {
     const res = await axios.post(endpoints.auth.register, data);
@@ -172,8 +190,9 @@ export function AuthProvider({ children }: Props) {
       login,
       register,
       logout,
+      loginByGoogle,
     }),
-    [login, logout, register, state.user, status]
+    [login, logout, register, state.user, status, loginByGoogle]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

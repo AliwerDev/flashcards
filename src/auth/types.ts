@@ -22,6 +22,11 @@ export type LoginDataType = {
   password: string;
 };
 
+export type LoginByGoogleDataType = {
+  credential?: string;
+  access_token?: string;
+};
+
 export type RegisterDataType = {
   email: string;
   password: string;
@@ -40,4 +45,5 @@ export type JWTContextType = {
   login: (data: LoginDataType) => Promise<void>;
   register: (data: RegisterDataType) => Promise<void>;
   logout: () => Promise<void>;
+  loginByGoogle: (data: LoginByGoogleDataType) => Promise<void>;
 };

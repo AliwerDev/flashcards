@@ -21,9 +21,10 @@ const AntdProvider = ({ children, lang }: Props) => {
       locale={lang === "en" ? en_US : ru_RU}
       theme={{
         token: {
-          colorPrimary: isDarkMode ? "#D980FA" : "#1C1C1C",
+          colorPrimary: isDarkMode ? "#73C0FF" : "#1A79C6",
           colorBorder: isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#00000010",
-          colorPrimaryBg: isDarkMode ? "#ffffff22" : "#1C1C1C22",
+          colorPrimaryBg: isDarkMode ? "#121212" : "#FFFFFF",
+          colorText: isDarkMode ? "#E0E0E0" : "#333333",
         },
         algorithm: isDarkMode ? [theme.darkAlgorithm] : [theme.defaultAlgorithm],
         components: {

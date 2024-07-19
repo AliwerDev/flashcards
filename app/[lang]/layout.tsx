@@ -29,6 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={lang} dir={dir(lang)}>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
       <body className={nunuto.className}>
         <Providers lang={lang}>{children}</Providers>
       </body>

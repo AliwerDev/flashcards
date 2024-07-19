@@ -1,3 +1,4 @@
 {
-  "i18n-ally.localesPaths": ["locales", "app/i18/locales"]
+  "i18n-ally.localesPaths": ["locales", "app/i18/locales"],
+  "i18n-ally.keystyle": "flat"
 }

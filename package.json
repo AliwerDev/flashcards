@@ -11,7 +11,9 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
     "@emotion/styled": "^11.11.5",
+    "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.6",
+    "@tanstack/react-query": "^5.51.1",
     "@types/antd": "^1.0.0",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.get": "^4.4.9",

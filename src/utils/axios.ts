@@ -38,6 +38,7 @@ export const endpoints = {
   },
   auth: {
     login: "/auth/login",
+    loginByGoogle: "/auth/login-by-google",
     register: "/auth/register",
   },
   card: {

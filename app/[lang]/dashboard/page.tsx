@@ -1,11 +1,174 @@
 "use client";
 import { useTranslation } from "@/app/i18/client";
-import React from "react";
+import { IBox } from "@/src/types/box";
+import { HiOutlineTrash } from "react-icons/hi2";
+import axiosInstance, { endpoints } from "@/src/utils/axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Card, Col, Empty, Flex, Input, message, Modal, Row, Segmented, Select, theme, Typography } from "antd";
+import { IoReload } from "react-icons/io5";
+import { Styled } from "../../components/dashboard/styled";
+import { useBoolean } from "@/src/hooks/use-boolean";
+import AddBoxModal from "@/app/components/dashboard/add-box-modal";
+import { minSeconds } from "@/src/utils/others";
+import { LuPlay, LuPlus, LuSearch, LuX } from "react-icons/lu";
+import { useEffect, useMemo, useState } from "react";
+import { ICard } from "@/src/types/card";
+import { useFilter } from "@/src/hooks/use-filter";
+import debounce from "lodash.debounce";
+import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
+
+const { Text, Title } = Typography;
 
 const Page = ({ params: { lang } }: { params: { lang: string } }) => {
+  const [modal, contextHolder] = Modal.useModal();
+  const queryClient = useQueryClient();
   const { t } = useTranslation(lang);
+  const [activeBoxId, setActiveBoxId] = useState<string>("");
+  const filter = useFilter({ search: "", boxId: "ALL", status: "ALL" });
 
-  return <p>{t("hello")}</p>;
+  const createBoxBool = useBoolean();
+  const createEditCardBool = useBoolean();
+
+  const { data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list) });
+  const boxes: IBox[] = data?.data || [];
+
+  const { data: cardData, isLoading: isLoadingCards } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
+  const cards: ICard[] = useMemo(() => {
+    return filterCards(cardData?.data, filter.value as Ifilter);
+  }, [filter, cardData]);
+
+  const { token } = theme.useToken();
+
+  const { mutate: removeBox, isPending: isDeletePending } = useMutation({
+    mutationKey: ["add-box"],
+    mutationFn: (id: string) => axiosInstance.delete(endpoints.box.delete(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boxes"] });
+      message.success(t("successfully_deleted"));
+    },
+    onError: () => "",
+  });
+
+  const confirmRemove = (id: string) => {
+    modal.confirm({
+      title: t("Are you sure you want to delete"),
+      okText: t("yes"),
+      onOk() {
+        removeBox(id);
+      },
+      onCancel() {},
+    });
+  };
+
+  useEffect(() => {
+    if (!activeBoxId && boxes.length) setActiveBoxId(boxes[0]._id);
+  }, [boxes]);
+
+  return (
+    <Styled>
+      {contextHolder}
+      <Flex justify="space-between" align="center" className="mb-1">
+        <Title level={4}>{t("Boxes")}</Title>
+        <Button onClick={createBoxBool.onTrue} type="default" icon={<LuPlus />}>
+          {t("Add new")}
+        </Button>
+      </Flex>
+
+      <Flex className="box-list">
+        <div className="flex gap-2 boxes">
+          {boxes.map((box, i) => (
+            <div onClick={() => setActiveBoxId(box._id)} key={box._id} style={{ borderColor: activeBoxId === box._id ? token.colorSuccess : token.colorBorder, backgroundColor: token.colorBgBase }} className={`box p-2 border flex flex-col gap-1 items-center rounded-md`}>
+              <Button loading={isDeletePending} onClick={() => confirmRemove(box._id)} className="remove-box" size="small" type="text" danger icon={<HiOutlineTrash />} />
+              <Text type="success" className="align-middle">
+                {i + 1}-{t("level")}
+              </Text>
+              <Title level={4} className="!my-0">
+                {box.cardCount}
+              </Title>
+              <Text type="secondary" className="flex gap-1 items-center flex-wrap text-xs justify-center">
+                <IoReload />
+                {minSeconds(box.reviewInterval * 60, t)}
+              </Text>
+            </div>
+          ))}
+        </div>
+      </Flex>
+
+      <Row className="justify-center py-10" gutter={20}>
+        <Col xs={24} md={12} lg={6} xl={4}>
+          <Button className="h-14 text-lg w-full" size="large" type="primary" icon={<LuPlay />}>
+            {t("Start study")}
+          </Button>
+        </Col>
+        <Col xs={24} md={12} lg={6} xl={4}>
+          <Button onClick={() => createEditCardBool.onTrue()} className="h-14 text-lg w-full" size="large" type="dashed" icon={<LuPlus />}>
+            {t("Add card")}
+          </Button>
+        </Col>
+      </Row>
+
+      <Card
+        classNames={{ header: "!px-3" }}
+        title={
+          <Row gutter={[10, 10]} className="py-3">
+            <Col xs={24} md={8}>
+              <Input onChange={debounce((e) => filter.changeFilter("search", e.target.value), 300)} prefix={<LuSearch />} placeholder={t("Search")} size="large" />
+            </Col>
+            <Col xs={24} md={8}>
+              <Segmented
+                block
+                onChange={(value) => filter.changeFilter("status", value)}
+                size="large"
+                options={[
+                  { label: t("All"), value: "ALL" },
+                  { label: t("Learned"), value: "LEARNED" },
+                ]}
+              />
+            </Col>
+            <Col xs={24} md={8}>
+              <Select onChange={(value) => filter.changeFilter("boxId", value)} className="w-full" defaultValue="ALL" size="large">
+                <Select.Option value={"ALL"}>{t("All")}</Select.Option>
+                {boxes.map((box, index) => (
+                  <Select.Option key={box._id} value={box._id}>
+                    {index + 1} - {t("level")}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Col>
+          </Row>
+        }
+      >
+        {cards.map((card) => (
+          <Card.Grid onClick={() => createEditCardBool.onTrue(card)} key={card._id} className="card-item w-1/4 cursor-pointer">
+            {card.front}
+          </Card.Grid>
+        ))}
+
+        {!isLoadingCards && cards.length == 0 && <Empty className="my-10" />}
+      </Card>
+
+      <AddEditCardModal {...{ boxes, activeBoxId, t }} open={createEditCardBool} />
+      <AddBoxModal t={t} open={createBoxBool} />
+    </Styled>
+  );
+};
+
+type Ifilter = {
+  search: string;
+  boxId: string;
+  status: string;
+};
+
+const filterCards = (cards: ICard[] = [], filter: Ifilter): ICard[] => {
+  cards = cards.filter((card) => {
+    const isMatchBoxId = filter.boxId === "ALL" ? true : card.boxId === filter.boxId;
+    const isMatchStatus = filter.status === "ALL" ? true : false;
+    const isMatchSearch = filter.search ? card.front.includes(filter.search) : true;
+
+    return isMatchBoxId && isMatchSearch && isMatchStatus;
+  });
+
+  return cards;
 };
 
 export default Page;

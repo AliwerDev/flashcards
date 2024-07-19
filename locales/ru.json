@@ -1,0 +1,10 @@
+{
+  "level": "Уровень",
+  "min": "min",
+  "review-interval": "Интервал проверки",
+  "Create new box": "Создать новый ящик",
+  "successfully_created": "Успешно создано!",
+  "review-interval-in-minues": "Интервал проверки в минутах",
+  "successfully_deleted": "Успешно удалено!",
+  "yes": "Да"
+}
