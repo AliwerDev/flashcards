@@ -1,8 +1,6 @@
 "use client";
-
 import React, { ReactNode } from "react";
 import { MoonOutlined, SunOutlined } from "@ant-design/icons";
-import { BsLayoutSidebar, BsLayoutSidebarReverse } from "react-icons/bs";
 import { Breadcrumb, Button, Drawer, Flex, Layout, Menu, theme } from "antd";
 import { useSettingsContext } from "@/src/settings/hooks";
 import { useDashboardMenus } from "@/src/hooks/use-dashboard-menus";
@@ -11,6 +9,8 @@ import { AuthGuard } from "@/src/auth/guard";
 import { useTranslation } from "@/app/i18/client";
 import ProfileItem from "@/app/components/dashboard/profile-item";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { CgMenuBoxed } from "react-icons/cg";
 
 const { Header, Sider, Content } = Layout;
 
@@ -21,8 +21,13 @@ interface ILayout {
 
 const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
   const { sidebar_collapsed, theme: apptheme, changeMode, updateData } = useSettingsContext();
-  const menus = useDashboardMenus();
+  const pathname = usePathname();
   const { t } = useTranslation(lang);
+  const menus = useDashboardMenus();
+
+  console.log(pathname);
+
+  const breadcrumbItems = generateBreadcrumbs(pathname);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -76,7 +81,10 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
         </Sider>
         <Layout>
           <Header style={{ paddingInline: "16px", background: colorBgContainer, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Breadcrumb items={[{ title: "Dashboard", href: "/" }]} />
+            <Flex align="center" gap={2}>
+              <Button className="md:hidden inline-block" type="text" onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} icon={<CgMenuBoxed />} />
+              <Breadcrumb items={breadcrumbItems} />
+            </Flex>
             <Flex gap="15px" align="center">
               <LanguageElements lang={lang} />
               <Button type="text" icon={apptheme == "dark" ? <SunOutlined /> : <MoonOutlined />} onClick={() => changeMode(apptheme == "dark" ? "light" : "dark")} />
@@ -88,7 +96,6 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             style={{
               padding: 24,
               minHeight: 280,
-              // background: colorBgContainer,
             }}
           >
             {children}
@@ -97,6 +104,18 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
       </Layout>
     </AuthGuard>
   );
+};
+
+const generateBreadcrumbs = (pathname: string) => {
+  const pathSegments = pathname
+    .split("/")
+    .filter((segment: string) => segment)
+    .slice(1);
+
+  return pathSegments.map((segment, index) => {
+    const href = "/" + pathSegments.slice(0, index + 1).join("/");
+    return { title: segment.charAt(0).toUpperCase() + segment.slice(1), href };
+  });
 };
 
 export default App;

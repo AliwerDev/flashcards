@@ -6,7 +6,6 @@ import Link from "next/link";
 import { paths } from "@/src/routes/paths";
 import { useAuthContext } from "@/src/auth/hooks";
 import { useGoogleLogin, useGoogleOneTapLogin, googleLogout } from "@react-oauth/google";
-import { BsGoogle } from "react-icons/bs";
 import { useBoolean } from "@/src/hooks/use-boolean";
 import { useTranslation } from "@/app/i18/client";
 
@@ -23,15 +22,18 @@ export default function LoginPage({ params: { lang } }: Props) {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const onFinish = async (values: any) => {
+  const onFinish = (values: any) => {
     loadingBool.onTrue();
     login(values).finally(() => loadingBool.onFalse());
   };
 
   const loginWithgoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+    onSuccess: (tokenResponse) => {
+      loadingBool.onTrue();
       googleLogout();
-      loginByGoogle({ access_token: tokenResponse.access_token as string });
+      loginByGoogle({ access_token: tokenResponse.access_token as string }).finally(() => {
+        loadingBool.onFalse();
+      });
     },
     onError: () => {
       message.error("Login Failed");
@@ -40,8 +42,11 @@ export default function LoginPage({ params: { lang } }: Props) {
 
   useGoogleOneTapLogin({
     onSuccess: (credentialResponse) => {
+      loadingBool.onTrue();
       googleLogout();
-      loginByGoogle({ credential: credentialResponse.credential as string });
+      loginByGoogle({ credential: credentialResponse.credential as string }).finally(() => {
+        loadingBool.onFalse();
+      });
     },
     onError: () => {
       message.error("Login Failed");
@@ -93,7 +98,7 @@ export default function LoginPage({ params: { lang } }: Props) {
         {t("or")}
       </Divider>
 
-      <Button onClick={() => loginWithgoogle()} type="dashed" size="large" icon={<BsGoogle />} className="w-full">
+      <Button onClick={() => loginWithgoogle()} type="dashed" size="large" icon={<img src="/assets/icons/ic_google.svg" width="20px" height="20px" alt="google" />} className="w-full !bg-white dark:!bg-inherit mb-2">
         {t("Continue with Google")}
       </Button>
     </div>

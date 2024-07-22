@@ -24,10 +24,12 @@ const AddEditCardModal = ({ open, t, activeBoxId, boxes }: Props) => {
 
   const { mutate: createCard, isPending } = useMutation({
     mutationKey: ["add-card"],
-    mutationFn: (data: ICard) => axiosInstance.post(endpoints.card.create, data),
+    mutationFn: (data: ICard) => (open.data ? axiosInstance.patch(endpoints.card.edit(open.data._id), data) : axiosInstance.post(endpoints.card.create, data)),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["boxes", variables.boxId] });
-      message.success(t("successfully_created"));
+      queryClient.invalidateQueries({ queryKey: ["boxes"] });
+      queryClient.invalidateQueries({ queryKey: ["active-cards"] });
+      message.success(open.data ? t("successfully_changed") : t("successfully_created"));
       cancel();
     },
     onError: () => "",
@@ -38,6 +40,8 @@ const AddEditCardModal = ({ open, t, activeBoxId, boxes }: Props) => {
     mutationFn: (card: ICard) => axiosInstance.delete(endpoints.card.delete(card._id)),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["boxes"] });
+      queryClient.invalidateQueries({ queryKey: ["active-cards"] });
       message.success(t("successfully_delated"));
       cancel();
     },

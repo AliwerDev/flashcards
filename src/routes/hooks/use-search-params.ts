@@ -1,16 +1,16 @@
+import { useSearchParams as useNextSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { useRouter } from "next/router";
 
 // ----------------------------------------------------------------------
 
 export function useSearchParams() {
-  const { query } = useRouter();
+  const query = useNextSearchParams();
 
   const searchParams = useMemo(() => {
     const params = new URLSearchParams();
     for (const key in query) {
       if (query.hasOwnProperty(key)) {
-        const value = query[key];
+        const value = query.get(key);
         if (Array.isArray(value)) {
           value.forEach((val) => params.append(key, val));
         } else {

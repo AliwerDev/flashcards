@@ -7,3 +7,8 @@ export interface ICard {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ICardPlayData {
+  cardId: string;
+  correct: boolean;
+}
