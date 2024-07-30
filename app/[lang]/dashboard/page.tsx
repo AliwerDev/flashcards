@@ -14,7 +14,7 @@ import { LuPlay, LuPlus } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import { ICard } from "@/src/types/card";
 import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
-import CardList from "@/app/components/dashboard/card-list";
+
 import { useRouter } from "next/navigation";
 
 const { Text, Title } = Typography;
@@ -29,7 +29,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
   const createBoxBool = useBoolean();
   const createEditCardBool = useBoolean();
 
-  const { data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list) });
+  const { data } = useQuery({ queryKey: ["boxes-with-count"], queryFn: () => axiosInstance.get(endpoints.box.listWithCardCount) });
   const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
 
   const boxes: IBox[] = data?.data || [];
@@ -67,8 +67,8 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
       {contextHolder}
       <Flex justify="space-between" align="center" className="mb-1">
         <Title level={4}>{t("Boxes")}</Title>
-        <Button onClick={createBoxBool.onTrue} type="default" icon={<LuPlus />}>
-          {t("Add new")}
+        <Button onClick={createBoxBool.onTrue} type="text" icon={<LuPlus />}>
+          {t("Add new box")}
         </Button>
       </Flex>
 
@@ -106,8 +106,6 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
           </Button>
         </Col>
       </Row>
-
-      <CardList boxes={boxes} editCardBool={createEditCardBool} t={t} />
 
       <AddEditCardModal {...{ boxes, activeBoxId, t }} openBool={createEditCardBool} />
       <AddBoxModal t={t} open={createBoxBool} />

@@ -12,8 +12,8 @@ const { Option } = Select;
 
 type Props = {
   openBool: BooleanReturnType;
-  activeBoxId: string;
-  boxes: IBox[];
+  activeBoxId?: string;
+  boxes?: IBox[];
   t: TFunction;
 };
 
@@ -91,24 +91,26 @@ const AddEditCardModal = ({ openBool, t, activeBoxId, boxes }: Props) => {
       {contextHolder}
 
       <Form form={form} name="add-card" onFinish={onFinish} layout="vertical">
-        <Form.Item
-          name="boxId"
-          label={t("Box")}
-          rules={[
-            {
-              required: true,
-              message: "Box is required!",
-            },
-          ]}
-        >
-          <Select size="large">
-            {boxes.map((box, index) => (
-              <Option key={box._id} value={box._id}>
-                {index + 1} - {t("level")}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+        {boxes?.length && (
+          <Form.Item
+            name="boxId"
+            label={t("Box")}
+            rules={[
+              {
+                required: true,
+                message: "Box is required!",
+              },
+            ]}
+          >
+            <Select size="large">
+              {boxes.map((box, index) => (
+                <Option key={box._id} value={box._id}>
+                  {index + 1} - {t("level")}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        )}
 
         {isJsonUploadBool.value ? (
           <Form.Item

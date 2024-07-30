@@ -3,18 +3,21 @@ import { useTranslation } from "@/app/i18/client";
 import { ICard } from "@/src/types/card";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Empty, Flex, theme, Typography } from "antd";
+import { Button, Empty, Flex, Space, theme, Typography } from "antd";
 import styled from "@emotion/styled";
 import React, { useEffect, useState } from "react";
 import { useBoolean } from "@/src/hooks/use-boolean";
 import { GoThumbsdown, GoThumbsup } from "react-icons/go";
-import { LuMoveLeft } from "react-icons/lu";
+import { LuMoveLeft, LuPencil } from "react-icons/lu";
+import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
+import { MdOutlineAdsClick } from "react-icons/md";
 
 const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
   const [activeCard, setActiveCard] = useState<ICard>();
   const showBool = useBoolean();
   const loading = useBoolean();
+  const editModalBool = useBoolean();
   const queryClient = useQueryClient();
 
   const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
@@ -42,17 +45,31 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
     onError: () => "",
   });
 
-  const { token } = theme.useToken();
-  const style = { background: token.colorBgBase, borderRadius: token.borderRadius };
+  const clickEditButton = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    editModalBool.onTrue(activeCard);
+  };
 
+  const { token } = theme.useToken();
+  const style = { background: token.colorBgContainer, borderRadius: token.borderRadius, border: "1 px solid", borderColor: token.colorBorder };
   useEffect(() => {
     if (active_cards.length > 0 && !activeCard) {
       setActiveCard(active_cards[0]);
     }
   }, [active_cards.length]);
 
+  const absoluteActions = (
+    <>
+      <Space className="message" align="center">
+        <MdOutlineAdsClick color={token.colorTextSecondary} />
+        <Typography.Text type="secondary">{t("Click to show other side!")}</Typography.Text>
+      </Space>
+      <Button className="edit-button" onClick={clickEditButton} size="small" type="text" icon={<LuPencil />} />
+    </>
+  );
+
   return (
-    <FlipCard className="">
+    <FlipCard>
       {active_cards.length <= 0 ? (
         <Empty
           description={
@@ -68,11 +85,13 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
       ) : (
         <>
           <div className="card cursor-pointer mx-auto">
-            <div onClick={showBool.onToggle} style={style} className={`card-content ${showBool.value ? "show" : ""}`}>
+            <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
               <div className="card-front">
+                {absoluteActions}
                 <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
               </div>
               <div className="card-back">
+                {absoluteActions}
                 <Typography.Title level={5}>{activeCard?.back}</Typography.Title>
               </div>
             </div>
@@ -103,6 +122,8 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
           </Flex>
         </>
       )}
+
+      <AddEditCardModal openBool={editModalBool} t={t} />
     </FlipCard>
   );
 };
@@ -110,6 +131,8 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
 const FlipCard = styled.div`
   .card {
     perspective: 1000px;
+    position: relative;
+    z-index: 15;
 
     .card-content {
       max-width: 700px;
@@ -118,7 +141,7 @@ const FlipCard = styled.div`
       margin: 0 auto;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.6s;
+      transition: transform 1s;
       -webkit-user-select: none;
       -ms-user-select: none;
       user-select: none;
@@ -137,6 +160,20 @@ const FlipCard = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .edit-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      gap: 10px;
+    }
+
+    .message {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     .card-back {

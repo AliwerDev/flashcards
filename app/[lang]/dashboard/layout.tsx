@@ -1,7 +1,7 @@
 "use client";
 import React, { ReactNode } from "react";
 import { MoonOutlined, SunOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Drawer, Flex, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Button, Drawer, Flex, Layout, Menu, Space, theme } from "antd";
 import { useSettingsContext } from "@/src/settings/hooks";
 import { useDashboardMenus } from "@/src/hooks/use-dashboard-menus";
 import { LanguageElements } from "@/app/components/dashboard/language";
@@ -10,7 +10,7 @@ import { useTranslation } from "@/app/i18/client";
 import ProfileItem from "@/app/components/dashboard/profile-item";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { CgMenuBoxed } from "react-icons/cg";
+import { GoPlus, GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 
 const { Header, Sider, Content } = Layout;
 
@@ -25,8 +25,6 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
   const { t } = useTranslation(lang);
   const menus = useDashboardMenus();
 
-  console.log(pathname);
-
   const breadcrumbItems = generateBreadcrumbs(pathname);
 
   const {
@@ -35,8 +33,16 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
 
   const logo = (
     <div className="w-full flex justify-start px-2 my-3 cursor-pointer">
-      <Image className="max-h-10 min-h-10" src={sidebar_collapsed ? "/assets/logo/logo-mini.svg" : "/assets/logo/logo.svg"} alt="flashcards" height={40} width={180} />
+      <Image className="max-h-10 min-h-10" src={sidebar_collapsed ? "/assets/logo/logo-mini.svg" : "/assets/logo/flashcards1.svg"} alt="flashcards" height={40} width={180} />
     </div>
+  );
+
+  const addCategoryButton = (
+    <Space className="w-full justify-center mt-3">
+      <Button size="large" type="dashed" icon={<GoPlus />}>
+        {t("Add new category")}
+      </Button>
+    </Space>
   );
 
   return (
@@ -53,6 +59,7 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             defaultSelectedKeys={["1"]}
             items={menus}
           />
+          {addCategoryButton}
         </Drawer>
 
         <Sider
@@ -61,11 +68,13 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             borderRadius: borderRadiusLG,
           }}
           collapsible
+          collapsedWidth="0"
           theme={apptheme}
           onCollapse={() => updateData({ sidebar_collapsed: !sidebar_collapsed })}
           className="hidden md:block"
           collapsed={sidebar_collapsed}
-          zeroWidthTriggerStyle={{ background: colorBgContainer, borderRadius: borderRadiusLG }}
+          trigger={null}
+          zeroWidthTriggerStyle={{ background: colorBgContainer }}
         >
           {logo}
           <Menu
@@ -78,11 +87,12 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             defaultSelectedKeys={["1"]}
             items={menus}
           />
+          {addCategoryButton}
         </Sider>
         <Layout>
-          <Header style={{ paddingInline: "16px", background: colorBgContainer, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Flex align="center" gap={2}>
-              <Button className="md:hidden inline-block" type="text" onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} icon={<CgMenuBoxed />} />
+          <Header style={{ paddingRight: "16px", paddingLeft: 0, background: colorBgContainer, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Flex align="center" gap={5}>
+              <Button type="text" onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} icon={sidebar_collapsed ? <GoSidebarCollapse className="text-lg" /> : <GoSidebarExpand className="text-lg" />} />
               <Breadcrumb items={breadcrumbItems} />
             </Flex>
             <Flex gap="15px" align="center">
@@ -92,9 +102,8 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             </Flex>
           </Header>
           <Content
-            className="m-2 mx-0 md:my-4 md:mx-4 lg:my-5"
+            className="m-2 mx-0 md:my-3 md:mx-3 lg:my-5 p-2 sm:p-4 md:p-4"
             style={{
-              padding: 24,
               minHeight: 280,
             }}
           >

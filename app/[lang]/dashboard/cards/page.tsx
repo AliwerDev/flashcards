@@ -1,23 +1,29 @@
-import { BooleanReturnType } from "@/src/hooks/use-boolean";
+"use client";
+
+import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
+import { useTranslation } from "@/app/i18/client";
+import { useBoolean } from "@/src/hooks/use-boolean";
 import { useFilter } from "@/src/hooks/use-filter";
 import { IBox } from "@/src/types/box";
 import { ICard } from "@/src/types/card";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Empty, Input, Row, Segmented, Select } from "antd";
-import { TFunction } from "i18next";
+import { Button, Col, Input, List, Row, Segmented, Select, theme, Typography } from "antd";
 import debounce from "lodash.debounce";
 import React, { useMemo } from "react";
-import { LuSearch } from "react-icons/lu";
+import { LuPencil, LuSearch } from "react-icons/lu";
+import styled from "@emotion/styled";
 
-interface Props {
-  boxes: IBox[];
-  editCardBool: BooleanReturnType;
-  t: TFunction;
-}
-
-const CardList = ({ boxes, editCardBool, t }: Props) => {
+const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
+  const { t } = useTranslation(lang);
+  const editCardBool = useBoolean();
   const filter = useFilter({ search: "", boxId: "ALL", status: "ALL" });
+  const {
+    token: { colorBgContainer, borderRadius },
+  } = theme.useToken();
+
+  const { data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list) });
+  const boxes: IBox[] = data?.data || [];
 
   const { data: cardData, isLoading: isLoadingCards } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
 
@@ -26,10 +32,9 @@ const CardList = ({ boxes, editCardBool, t }: Props) => {
   }, [filter, cardData]);
 
   return (
-    <Card
-      classNames={{ header: "!px-3" }}
-      title={
-        <Row gutter={[10, 10]} className="py-3">
+    <Styled>
+      <div className="card-list-header p-1 xl:p-3" style={{ backgroundColor: colorBgContainer, borderRadius }}>
+        <Row gutter={[10, 10]}>
           <Col xs={24} md={8}>
             <Input className="md:max-w-60" onChange={debounce((e) => filter.changeFilter("search", e.target.value), 300)} prefix={<LuSearch />} placeholder={t("Search")} size="large" />
           </Col>
@@ -55,18 +60,29 @@ const CardList = ({ boxes, editCardBool, t }: Props) => {
             </Select>
           </Col>
         </Row>
-      }
-    >
-      {filteredCards.map((card) => (
-        <Card.Grid onClick={() => editCardBool.onTrue(card)} key={card._id} className="card-item w-1/4 cursor-pointer">
-          {card.front}
-        </Card.Grid>
-      ))}
+      </div>
 
-      {!isLoadingCards && filteredCards.length == 0 && <Empty className="my-10" />}
-    </Card>
+      <List style={{ backgroundColor: colorBgContainer, overflow: "auto" }} bordered loading={isLoadingCards} dataSource={filteredCards} renderItem={(item) => <List.Item actions={[<Button onClick={() => editCardBool.onTrue(item)} type="text" icon={<LuPencil />} />]}>{item.front}</List.Item>} />
+
+      <AddEditCardModal {...{ boxes, t }} openBool={editCardBool} />
+    </Styled>
   );
 };
+
+const Styled = styled.div`
+  height: 100%;
+  display: grid;
+  grid-template-rows: max-content auto;
+  grid-template-columns: 100%;
+
+  .card-list-header {
+    margin-bottom: 10px;
+  }
+
+  .ant-empty {
+    margin-top: 100px;
+  }
+`;
 
 type Ifilter = {
   search: string;
@@ -86,4 +102,4 @@ const filterFunction = (cards: ICard[] = [], filter: Ifilter): ICard[] => {
   return cards;
 };
 
-export default CardList;
+export default CardsPage;

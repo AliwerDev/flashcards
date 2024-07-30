@@ -1,5 +1,5 @@
 "use client";
-import { UploadOutlined, UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
+import { Typography } from "antd";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,19 +11,9 @@ export const useDashboardMenus = () => {
   const menuItems: Menus = useMemo(
     () => [
       {
-        key: "1",
-        icon: <UserOutlined />,
-        label: "nav 1",
-      },
-      {
-        key: "2",
-        icon: <VideoCameraOutlined />,
-        label: "nav 2",
-      },
-      {
-        key: "3",
-        icon: <UploadOutlined />,
-        label: "nav 3",
+        key: "default",
+        icon: null,
+        label: "Default category",
       },
     ],
     [t]
