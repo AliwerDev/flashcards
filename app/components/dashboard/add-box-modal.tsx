@@ -19,7 +19,7 @@ const AddBoxModal = ({ open, t }: Props) => {
     mutationKey: ["add-box"],
     mutationFn: (data: any) => axiosInstance.post(endpoints.box.create, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boxes"] });
+      queryClient.invalidateQueries({ queryKey: ["boxes-with-count"] });
       message.success(t("successfully_created"));
       open.onFalse();
       form.resetFields();

@@ -41,7 +41,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
     mutationKey: ["add-box"],
     mutationFn: (id: string) => axiosInstance.delete(endpoints.box.delete(id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boxes"] });
+      queryClient.invalidateQueries({ queryKey: ["boxes-with-count"] });
       message.success(t("successfully_deleted"));
     },
     onError: () => "",
