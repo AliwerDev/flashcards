@@ -1,5 +1,4 @@
 "use client";
-import { Typography } from "antd";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
