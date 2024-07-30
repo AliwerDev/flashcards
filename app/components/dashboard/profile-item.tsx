@@ -48,7 +48,7 @@ const ProfileItem = ({ t, lang }: { t: any; lang: string }) => {
           }}
         >
           <div className={"flex items-center px-3 py-2"}>
-            <Avatar src={user && user.photoUrl} className={"mr-2"} icon={<FaRegUser />} />
+            <Avatar src={user && user.picture} className={"mr-2"} icon={<FaRegUser />} />
             <div className={"m-0"}>
               <Typography className={"font-bold"}>{user && (user.firstName || user.lastName) ? `${user.firstName} ${user.lastName}` : t("User")}</Typography>
               <Typography>{user && user.email}</Typography>
@@ -59,7 +59,7 @@ const ProfileItem = ({ t, lang }: { t: any; lang: string }) => {
         </div>
       )}
     >
-      <Avatar src={user && user.photoUrl} className={"cursor-pointer"} size={"small"} icon={<FaRegUser />} />
+      <Avatar src={user && user.picture} className={"cursor-pointer"} size={"small"} icon={<FaRegUser />} />
     </Dropdown>
   );
 };

@@ -1,4 +1,3 @@
-import { languages } from "@/app/i18/settings";
 import { BooleanReturnType } from "@/src/hooks/use-boolean";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -63,7 +62,7 @@ const AddBoxModal = ({ open, t }: Props) => {
               <Option value="60">{t("hour")}</Option>
               <Option value="1440">{t("day")}</Option>
               <Option value="10080">{t("week")}</Option>
-              <Option value="302400">{t("month")}</Option>
+              <Option value="43200">{t("month")}</Option>
             </Select>
           </Form.Item>
         </Flex>

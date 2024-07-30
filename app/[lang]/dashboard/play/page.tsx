@@ -8,13 +8,13 @@ import styled from "@emotion/styled";
 import React, { useEffect, useState } from "react";
 import { useBoolean } from "@/src/hooks/use-boolean";
 import { GoThumbsdown, GoThumbsup } from "react-icons/go";
-import { HiBackward } from "react-icons/hi2";
 import { LuMoveLeft } from "react-icons/lu";
 
 const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
   const [activeCard, setActiveCard] = useState<ICard>();
   const showBool = useBoolean();
+  const loading = useBoolean();
   const queryClient = useQueryClient();
 
   const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
@@ -34,6 +34,8 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
           changed_active_cards.push(playedCard[0]);
         }
         setActiveCard(changed_active_cards[0]);
+        showBool.onFalse();
+        loading.onFalse();
         return { ...oldData, data: changed_active_cards };
       });
     },
@@ -77,8 +79,27 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
           </div>
 
           <Flex gap="15px" className="actions">
-            <Button onClick={() => playCard(false)} danger size="large" type="dashed" icon={<GoThumbsdown />}></Button>
-            <Button onClick={() => playCard(true)} size="large" type="dashed" icon={<GoThumbsup />}></Button>
+            <Button
+              onClick={() => {
+                loading.onTrue("incorrect");
+                playCard(false);
+              }}
+              danger
+              size="large"
+              type="dashed"
+              loading={loading.data === "incorrect"}
+              icon={<GoThumbsdown />}
+            ></Button>
+            <Button
+              onClick={() => {
+                loading.onTrue("correct");
+                playCard(true);
+              }}
+              loading={loading.data === "correct"}
+              size="large"
+              type="dashed"
+              icon={<GoThumbsup />}
+            ></Button>
           </Flex>
         </>
       )}

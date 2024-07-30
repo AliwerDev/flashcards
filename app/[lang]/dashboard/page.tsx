@@ -109,7 +109,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
 
       <CardList boxes={boxes} editCardBool={createEditCardBool} t={t} />
 
-      <AddEditCardModal {...{ boxes, activeBoxId, t }} open={createEditCardBool} />
+      <AddEditCardModal {...{ boxes, activeBoxId, t }} openBool={createEditCardBool} />
       <AddBoxModal t={t} open={createBoxBool} />
     </Styled>
   );
