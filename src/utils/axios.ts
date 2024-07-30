@@ -19,7 +19,6 @@ axiosInstance.interceptors.response.use(
 );
 
 axiosInstance.interceptors.request.use((config) => {
-  config.headers["Origin"] = window.location.origin;
   return config;
 });
 
