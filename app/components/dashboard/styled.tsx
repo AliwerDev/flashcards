@@ -9,7 +9,7 @@ export const Styled = styled.div`
       max-width: 100%;
       overflow-x: auto;
       height: 120px;
-      width: 100%;
+      margin: 0 auto;
 
       .box {
         position: relative;

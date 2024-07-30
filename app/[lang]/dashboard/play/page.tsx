@@ -88,6 +88,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
             <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
               <div className="card-front">
                 {absoluteActions}
+
                 <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
               </div>
               <div className="card-back">
@@ -109,6 +110,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
               loading={loading.data === "incorrect"}
               icon={<GoThumbsdown />}
             ></Button>
+
             <Button
               onClick={() => {
                 loading.onTrue("correct");
@@ -129,10 +131,17 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
 };
 
 const FlipCard = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: -64px;
+
   .card {
     perspective: 1000px;
     position: relative;
     z-index: 15;
+    width: 100%;
 
     .card-content {
       max-width: 700px;
@@ -142,9 +151,6 @@ const FlipCard = styled.div`
       position: relative;
       transform-style: preserve-3d;
       transition: transform 1s;
-      -webkit-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
 
       &.show {
         transform: rotateY(180deg);
@@ -160,6 +166,11 @@ const FlipCard = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
+
+      h5 {
+        text-align: center;
+        padding-inline: 10px;
+      }
     }
 
     .edit-button {
