@@ -4,7 +4,7 @@ import { IBox } from "@/src/types/box";
 import { HiOutlineTrash } from "react-icons/hi2";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Col, Flex, message, Modal, Row, Skeleton, theme, Typography } from "antd";
+import { Badge, Button, Card, Col, Flex, message, Modal, Row, Skeleton, theme, Typography } from "antd";
 import { IoReload } from "react-icons/io5";
 import { Styled } from "../../components/dashboard/styled";
 import { useBoolean } from "@/src/hooks/use-boolean";
@@ -16,6 +16,8 @@ import { ICard } from "@/src/types/card";
 import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
 
 import { useRouter } from "next/navigation";
+import LineChart from "@/app/components/analitics/LineChart";
+import get from "lodash.get";
 
 const { Text, Title } = Typography;
 
@@ -31,6 +33,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
 
   const { data, isLoading: isFetchingBoxes } = useQuery({ queryKey: ["boxes-with-count"], queryFn: () => axiosInstance.get(endpoints.box.listWithCardCount) });
   const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
+  const { data: reviewsData } = useQuery({ queryKey: ["reviews"], queryFn: () => axiosInstance.get(endpoints.card.reviews) });
 
   const boxes: IBox[] = data?.data || [];
   const active_cards: ICard[] = active_cards_data?.data || [];
@@ -125,6 +128,10 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
           </Button>
         </Col>
       </Row>
+
+      <Card className="mt-5" classNames={{ body: "!p-0" }}>
+        <LineChart data={get(reviewsData, "data", [])} />
+      </Card>
 
       <AddEditCardModal {...{ boxes, activeBoxId, t }} openBool={createEditCardBool} />
       <AddBoxModal t={t} open={createBoxBool} />

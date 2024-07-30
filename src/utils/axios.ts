@@ -52,6 +52,7 @@ export const endpoints = {
     createList: "/card/list",
     play: "/card/play",
     getActive: "/card/active",
+    reviews: "card/reviews",
     edit: (id: string) => `/card/${id}`,
     delete: (id: string) => `/card/${id}`,
     getOne: (id: string) => `/card/${id}`,
