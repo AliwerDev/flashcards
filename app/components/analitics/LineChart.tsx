@@ -1,3 +1,4 @@
+"use client";
 // LineChart.tsx
 import { useSettingsContext } from "@/src/settings/hooks";
 import { IReview } from "@/src/types/other";
