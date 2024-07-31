@@ -62,7 +62,17 @@ const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
         </Row>
       </div>
 
-      <List style={{ backgroundColor: colorBgContainer, overflow: "auto" }} bordered loading={isLoadingCards} dataSource={filteredCards} renderItem={(item) => <List.Item actions={[<Button onClick={() => editCardBool.onTrue(item)} type="text" icon={<LuPencil />} />]}>{item.front}</List.Item>} />
+      <List
+        style={{ backgroundColor: colorBgContainer, overflow: "auto" }}
+        bordered
+        loading={isLoadingCards}
+        dataSource={filteredCards}
+        renderItem={(item, i) => (
+          <List.Item actions={[<Button onClick={() => editCardBool.onTrue(item)} type="text" icon={<LuPencil />} />]}>
+            {i + 1}. {item.front}
+          </List.Item>
+        )}
+      />
 
       <AddEditCardModal {...{ boxes, t }} openBool={editCardBool} />
     </Styled>
