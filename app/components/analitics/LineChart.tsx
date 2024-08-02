@@ -62,17 +62,17 @@ const LineChart: React.FC<LineChartProps> = ({ data }) => {
         categories: dates,
       },
       stroke: {
-        width: [3, 3],
+        width: [1, 1],
       },
       markers: {
-        size: 5,
+        size: 0,
       },
       legend: {
         position: "top" as "top",
       },
       fill: {
         opacity: 1,
-        colors: ["#0eb132", "#F44336"],
+        colors: ["#0eb132", "#F44336", ""],
       },
     },
   };

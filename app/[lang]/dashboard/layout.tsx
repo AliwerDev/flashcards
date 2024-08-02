@@ -11,6 +11,7 @@ import ProfileItem from "@/app/components/dashboard/profile-item";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { GoPlus, GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
+import SimpleBar from "simplebar-react";
 
 const { Header, Sider, Content } = Layout;
 
@@ -90,7 +91,7 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
           {addCategoryButton}
         </Sider>
         <Layout>
-          <Header style={{ paddingRight: "16px", paddingLeft: 0, background: colorBgContainer, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Header className="pr-4 pl-0 flex justify-between items-center" style={{ background: colorBgContainer }}>
             <Flex align="center" gap={5}>
               <Button type="text" onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} icon={sidebar_collapsed ? <GoSidebarCollapse className="text-lg" /> : <GoSidebarExpand className="text-lg" />} />
               <Breadcrumb items={breadcrumbItems} />
@@ -101,12 +102,8 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
               <ProfileItem lang={lang} t={t} />
             </Flex>
           </Header>
-          <Content
-            className="m-2 mx-0 md:my-3 md:mx-3 lg:my-5 p-2 sm:p-4 md:p-4"
-            style={{
-              minHeight: 280,
-            }}
-          >
+
+          <Content className="p-2 sm:p-4 md:p-4" style={{ height: "calc(100vh - 64px)", overflowY: "auto" }}>
             {children}
           </Content>
         </Layout>

@@ -3,30 +3,29 @@ import { useTranslation } from "@/app/i18/client";
 import { IBox } from "@/src/types/box";
 import { HiOutlineTrash } from "react-icons/hi2";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, Col, Flex, message, Modal, Row, Skeleton, theme, Typography } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Badge, Button, Card, Col, Flex, message, Modal, Popconfirm, Row, Skeleton, theme, Typography } from "antd";
 import { IoReload } from "react-icons/io5";
 import { Styled } from "../../components/dashboard/styled";
 import { useBoolean } from "@/src/hooks/use-boolean";
 import AddBoxModal from "@/app/components/dashboard/add-box-modal";
 import { minSeconds } from "@/src/utils/others";
 import { LuMenu, LuPlay, LuPlus } from "react-icons/lu";
-import { useEffect, useState } from "react";
 import { ICard } from "@/src/types/card";
 import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
 
 import { useRouter } from "next/navigation";
 import LineChart from "@/app/components/analitics/LineChart";
 import get from "lodash.get";
+import { useQueryClientInstance } from "@/src/context/QueryClient.client";
 
 const { Text, Title } = Typography;
 
 const Page = ({ params: { lang } }: { params: { lang: string } }) => {
   const router = useRouter();
   const [modal, contextHolder] = Modal.useModal();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClientInstance();
   const { t } = useTranslation(lang);
-  const [activeBoxId, setActiveBoxId] = useState<string>("");
 
   const createBoxBool = useBoolean();
   const createEditCardBool = useBoolean();
@@ -50,26 +49,13 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
     onError: () => "",
   });
 
-  const confirmRemove = (id: string) => {
-    modal.confirm({
-      title: t("Are you sure you want to delete"),
-      okText: t("yes"),
-      onOk() {
-        removeBox(id);
-      },
-      onCancel() {},
-    });
-  };
-
-  useEffect(() => {
-    if (!activeBoxId && boxes.length) setActiveBoxId(boxes[0]._id);
-  }, [boxes]);
-
   const startButton = (
-    <Button onClick={() => router.push(`/${lang}/dashboard/play`)} disabled={active_cards.length <= 0} className="h-14 text-lg w-full" size="large" type="primary" icon={<LuPlay />}>
+    <Button onClick={() => router.push(`/${lang}/dashboard/play`)} disabled={active_cards.length <= 0} className="w-full" size="large" type="primary" icon={<LuPlay />}>
       {t("Start learning")}
     </Button>
   );
+
+  const boxStyle = (box: IBox) => ({ borderRadius: token.borderRadius, borderColor: token.colorBorder, backgroundColor: box.cardCount ? token.colorBgContainer : token.colorBgTextHover });
 
   return (
     <Styled>
@@ -86,14 +72,20 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
           {isFetchingBoxes
             ? new Array(4).fill("-").map((_, i) => <Skeleton.Node key={i} active />)
             : boxes.map((box, i) => (
-                <div onClick={() => setActiveBoxId(box._id)} key={box._id} style={{ borderRadius: token.borderRadius, borderColor: activeBoxId === box._id ? token.colorSuccess : token.colorBorder, backgroundColor: token.colorBgBase }} className={`box p-2 border flex flex-col gap-1 items-center`}>
-                  {i > 0 && <Button loading={isDeletePending} onClick={() => confirmRemove(box._id)} className="remove-box" size="small" type="text" danger icon={<HiOutlineTrash />} />}
+                <div key={box._id} className="box">
                   <Text type="success" className="align-middle">
-                    {i + 1}-{t("level")}
+                    {i + 1}
                   </Text>
-                  <Title level={4} className="!my-0">
-                    {box.cardCount}
-                  </Title>
+                  <div style={boxStyle(box)} className={`box-content ${box.cardCount ? "hascard" : ""}`}>
+                    {i > 0 && (
+                      <Popconfirm title="Are you sure to delete this box?" onConfirm={() => removeBox(box._id)} okText={t("Yes")} cancelText={t("No")}>
+                        <HiOutlineTrash className="remove-box" color="#F44336" />
+                      </Popconfirm>
+                    )}
+                    <Title level={5} className="!my-0">
+                      {box.cardCount}
+                    </Title>
+                  </div>
                   <Text type="secondary" className="flex gap-1 items-center flex-wrap text-xs justify-center">
                     <IoReload />
                     {minSeconds(box.reviewInterval * 60, t)}
@@ -111,7 +103,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
         ) : null}
 
         <Col xs={24} md={12} lg={6} xl={4}>
-          <Button onClick={() => createEditCardBool.onTrue()} className="h-14 text-lg w-full" size="large" type="dashed" icon={<LuPlus />}>
+          <Button onClick={() => createEditCardBool.onTrue()} className="w-full" size="large" type="dashed" icon={<LuPlus />}>
             {t("Add card")}
           </Button>
         </Col>
@@ -123,7 +115,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
         </Col>
 
         <Col xs={24} md={12} lg={6} xl={4}>
-          <Button onClick={() => router.push(`/${lang}/dashboard/cards`)} className="h-14 text-lg w-full" size="large" type="dashed" icon={<LuMenu />}>
+          <Button onClick={() => router.push(`/${lang}/dashboard/cards`)} className="w-full" size="large" type="dashed" icon={<LuMenu />}>
             {t("Cards list")}
           </Button>
         </Col>
@@ -133,7 +125,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
         <LineChart data={get(reviewsData, "data", [])} />
       </Card>
 
-      <AddEditCardModal {...{ boxes, activeBoxId, t }} openBool={createEditCardBool} />
+      <AddEditCardModal {...{ boxes, t }} openBool={createEditCardBool} />
       <AddBoxModal t={t} open={createBoxBool} />
     </Styled>
   );

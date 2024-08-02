@@ -16,21 +16,21 @@ export function minSeconds(seconds: number, t: TFunction): string {
   const month = 2592000; // Assuming a month has 30 days
 
   if (seconds < minute) {
-    return `${seconds} ${t("sec")}`;
+    return `${seconds}s`;
   } else if (seconds < hour) {
     const minutes = +(seconds / minute).toFixed(1); // one decimal place
-    return `${minutes} ${t("min")}`;
+    return `${minutes}min`;
   } else if (seconds < day) {
     const hours = +(seconds / hour).toFixed(1); // one decimal place
-    return `${hours} ${t("hour")}`;
+    return `${hours}h`;
   } else if (seconds < week) {
     const days = +(seconds / day).toFixed(1); // one decimal place
-    return `${days} ${t("day")}`;
+    return `${days}d`;
   } else if (seconds < month) {
     const weeks = +(seconds / week).toFixed(1); // one decimal place
-    return `${weeks} ${t("week")}`;
+    return `${weeks}w`;
   } else {
     const months = +(seconds / month).toFixed(1); // one decimal place
-    return `${months} ${t("month")}`;
+    return `${months}m`;
   }
 }

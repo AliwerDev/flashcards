@@ -1,3 +1,4 @@
+import { useQueryClientInstance } from "@/src/context/QueryClient.client";
 import { BooleanReturnType } from "@/src/hooks/use-boolean";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,7 +13,7 @@ type Props = {
 };
 
 const AddBoxModal = ({ open, t }: Props) => {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClientInstance();
   const [form] = Form.useForm();
 
   const { mutate: createBox, isPending } = useMutation({

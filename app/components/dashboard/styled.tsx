@@ -8,32 +8,37 @@ export const Styled = styled.div`
     .boxes {
       max-width: 100%;
       overflow-x: auto;
-      height: 120px;
       margin: 0 auto;
 
       .box {
-        position: relative;
-        height: 90px;
-        min-width: 90px;
-        max-width: 120px;
-        flex: 1;
+        width: 55px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
 
-        .remove-box {
-          position: absolute;
-          bottom: 0px;
-          left: 50%;
-          opacity: 0;
-          visibility: collapse;
-          transition: all 0.2s ease;
-          transform: translate(-50%);
-        }
+        .box-content {
+          width: 45px;
+          height: 45px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: relative;
 
-        &:hover {
-          cursor: pointer;
           .remove-box {
-            opacity: 1;
-            bottom: -25px;
-            visibility: visible;
+            position: absolute;
+            top: 0;
+            right: 0;
+            opacity: 0;
+            visibility: collapse;
+            transition: all 0.2s ease;
+            transform: translate(50%, -50%);
+          }
+          &:hover {
+            cursor: pointer;
+            .remove-box {
+              opacity: 1;
+              visibility: visible;
+            }
           }
         }
       }

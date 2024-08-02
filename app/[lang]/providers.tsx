@@ -1,9 +1,15 @@
 "use client";
 import { AuthProvider } from "@/src/auth/context";
+import { QueryClientInstanceProvider, useQueryClientInstance } from "@/src/context/QueryClient.client";
 import { SettingsProvider } from "@/src/settings/context";
 import AntdProvider from "@/src/theme/antd-provider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+
+const AppQueryClientInstanceWrapper = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = useQueryClientInstance();
+
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+};
 
 export function Providers({
   children,
@@ -12,15 +18,15 @@ export function Providers({
   children: React.ReactNode;
   lang: string;
 }>) {
-  const [queryClient] = useState(() => new QueryClient());
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SettingsProvider>
-          <AntdProvider lang={lang}>{children}</AntdProvider>
-        </SettingsProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <QueryClientInstanceProvider>
+      <AppQueryClientInstanceWrapper>
+        <AuthProvider>
+          <SettingsProvider>
+            <AntdProvider lang={lang}>{children}</AntdProvider>
+          </SettingsProvider>
+        </AuthProvider>
+      </AppQueryClientInstanceWrapper>
+    </QueryClientInstanceProvider>
   );
 }

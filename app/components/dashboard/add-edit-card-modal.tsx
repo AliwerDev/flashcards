@@ -1,35 +1,42 @@
-import { languages } from "@/app/i18/settings";
+import { useQueryClientInstance } from "@/src/context/QueryClient.client";
 import { BooleanReturnType, useBoolean } from "@/src/hooks/use-boolean";
 import { IBox } from "@/src/types/box";
 import { ICard } from "@/src/types/card";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Button, Flex, Form, Input, message, Modal, Select, Space, Switch, Typography } from "antd";
 import { TFunction } from "i18next";
+import get from "lodash.get";
 import React, { useEffect } from "react";
 import { LuTrash } from "react-icons/lu";
 const { Option } = Select;
 
 type Props = {
   openBool: BooleanReturnType;
-  activeBoxId?: string;
   boxes?: IBox[];
   t: TFunction;
+  inPlayPage?: boolean;
 };
 
-const AddEditCardModal = ({ openBool, t, activeBoxId, boxes }: Props) => {
-  const queryClient = useQueryClient();
+const AddEditCardModal = ({ openBool, t, boxes, inPlayPage = false }: Props) => {
+  const queryClient = useQueryClientInstance();
   const [form] = Form.useForm();
   const [modal, contextHolder] = Modal.useModal();
   const isJsonUploadBool = useBoolean();
 
-  const { mutate: createCard, isPending } = useMutation({
+  const { mutate: createOrEditCard, isPending } = useMutation({
     mutationKey: ["add-card"],
     mutationFn: (data: ICard) => (openBool.data ? axiosInstance.patch(endpoints.card.edit(openBool.data._id), data) : isJsonUploadBool.value ? axiosInstance.post(endpoints.card.createList, data) : axiosInstance.post(endpoints.card.create, data)),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["boxes", variables.boxId] });
-      queryClient.invalidateQueries({ queryKey: ["boxes"] });
-      queryClient.invalidateQueries({ queryKey: ["active-cards"] });
+    onSuccess: () => {
+      if (inPlayPage) {
+        queryClient.invalidateQueries({ queryKey: ["active-cards"] });
+      } else if (!openBool.data) {
+        queryClient.invalidateQueries({ queryKey: ["boxes-with-count"] });
+        queryClient.invalidateQueries({ queryKey: ["active-cards"] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["cards"] });
+      }
+
       message.success(openBool.data ? t("successfully_changed") : t("successfully_created"));
       cancel();
     },
@@ -37,11 +44,11 @@ const AddEditCardModal = ({ openBool, t, activeBoxId, boxes }: Props) => {
   });
 
   const { mutate: deleteCard, isPending: isDeletePending } = useMutation({
-    mutationKey: ["add-card"],
+    mutationKey: ["delete-card"],
     mutationFn: (card: ICard) => axiosInstance.delete(endpoints.card.delete(card._id)),
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards"] });
-      queryClient.invalidateQueries({ queryKey: ["boxes"] });
+      queryClient.invalidateQueries({ queryKey: ["boxes-with-count"] });
       queryClient.invalidateQueries({ queryKey: ["active-cards"] });
       message.success(t("successfully_delated"));
       cancel();
@@ -53,13 +60,13 @@ const AddEditCardModal = ({ openBool, t, activeBoxId, boxes }: Props) => {
     if (isJsonUploadBool.value) {
       try {
         const cards = JSON.parse(values.cards);
-        createCard({ ...values, cards });
+        createOrEditCard({ ...values, cards });
       } catch (error) {
         message.error(t("Invalid json format, don't forget keys and values must be enclosed in double quotes!"));
         return;
       }
     } else {
-      createCard(values);
+      createOrEditCard(values);
     }
   };
 
@@ -82,9 +89,9 @@ const AddEditCardModal = ({ openBool, t, activeBoxId, boxes }: Props) => {
   useEffect(() => {
     if (openBool.value) {
       if (openBool.data) form.setFieldsValue(openBool.data);
-      else if (activeBoxId) form.setFieldsValue({ boxId: activeBoxId });
+      else if (boxes?.length) form.setFieldsValue({ boxId: get(boxes, "[0]._id") });
     }
-  }, [openBool, activeBoxId]);
+  }, [openBool, boxes]);
 
   return (
     <Modal open={openBool.value} onClose={cancel} onCancel={cancel} title={openBool.data ? t("Edit card") : t("Create new card")} footer={null}>

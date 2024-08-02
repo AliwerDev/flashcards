@@ -2,7 +2,7 @@
 import { useTranslation } from "@/app/i18/client";
 import { ICard } from "@/src/types/card";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Empty, Flex, Space, theme, Typography } from "antd";
 import styled from "@emotion/styled";
 import React, { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import { GoThumbsdown, GoThumbsup } from "react-icons/go";
 import { LuMoveLeft, LuPencil } from "react-icons/lu";
 import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
 import { MdOutlineAdsClick } from "react-icons/md";
+import { useQueryClientInstance } from "@/src/context/QueryClient.client";
 
 const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
@@ -18,7 +19,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const showBool = useBoolean();
   const loading = useBoolean();
   const editModalBool = useBoolean();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClientInstance();
 
   const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
   const active_cards: ICard[] = active_cards_data?.data || [];
@@ -52,11 +53,12 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
 
   const { token } = theme.useToken();
   const style = { background: token.colorBgContainer, borderRadius: token.borderRadius, border: "1 px solid", borderColor: token.colorBorder };
+
   useEffect(() => {
-    if (active_cards.length > 0 && !activeCard) {
+    if (active_cards.length > 0) {
       setActiveCard(active_cards[0]);
     }
-  }, [active_cards.length]);
+  }, [active_cards_data]);
 
   const absoluteActions = (
     <>
@@ -125,7 +127,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
         </>
       )}
 
-      <AddEditCardModal openBool={editModalBool} t={t} />
+      <AddEditCardModal openBool={editModalBool} t={t} inPlayPage />
     </FlipCard>
   );
 };

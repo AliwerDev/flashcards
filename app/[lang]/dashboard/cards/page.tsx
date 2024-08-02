@@ -13,6 +13,7 @@ import debounce from "lodash.debounce";
 import React, { useMemo } from "react";
 import { LuPencil, LuSearch } from "react-icons/lu";
 import styled from "@emotion/styled";
+import SimpleBar from "simplebar-react";
 
 const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
@@ -62,17 +63,19 @@ const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
         </Row>
       </div>
 
-      <List
-        style={{ backgroundColor: colorBgContainer, overflow: "auto" }}
-        bordered
-        loading={isLoadingCards}
-        dataSource={filteredCards}
-        renderItem={(item, i) => (
-          <List.Item actions={[<Button onClick={() => editCardBool.onTrue(item)} type="text" icon={<LuPencil />} />]}>
-            {i + 1}. {item.front}
-          </List.Item>
-        )}
-      />
+      <SimpleBar style={{ maxHeight: "calc(100% - 58px)" }}>
+        <List
+          style={{ backgroundColor: colorBgContainer }}
+          bordered
+          loading={isLoadingCards}
+          dataSource={filteredCards}
+          renderItem={(item, i) => (
+            <List.Item actions={[<Button onClick={() => editCardBool.onTrue(item)} type="text" icon={<LuPencil />} />]}>
+              {i + 1}. {item.front}
+            </List.Item>
+          )}
+        />
+      </SimpleBar>
 
       <AddEditCardModal {...{ boxes, t }} openBool={editCardBool} />
     </Styled>
@@ -81,9 +84,8 @@ const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
 
 const Styled = styled.div`
   height: 100%;
-  display: grid;
-  grid-template-rows: max-content auto;
-  grid-template-columns: 100%;
+  max-height: 100%;
+  overflow: hidden;
 
   .card-list-header {
     margin-bottom: 10px;
