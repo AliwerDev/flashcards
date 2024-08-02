@@ -32,3 +32,16 @@ input:-webkit-autofill {
   -webkit-box-shadow: none;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+#install-button {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  background-color: #6200ee;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
