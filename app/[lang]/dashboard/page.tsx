@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import LineChart from "@/app/components/analitics/LineChart";
 import get from "lodash.get";
 import { useQueryClientInstance } from "@/src/context/QueryClient.client";
+import { useMemo } from "react";
 
 const { Text, Title } = Typography;
 
@@ -48,6 +49,8 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
     },
     onError: () => "",
   });
+
+  const allCardsCount = useMemo(() => boxes.reduce((acc, box) => acc + (box.cardCount || 0), 0), [data]);
 
   const startButton = (
     <Button onClick={() => router.push(`/${lang}/dashboard/play`)} disabled={active_cards.length <= 0} className="w-full" size="large" type="primary" icon={<LuPlay />}>
@@ -115,8 +118,11 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
         </Col>
 
         <Col xs={24} md={12} lg={6} xl={4}>
-          <Button onClick={() => router.push(`/${lang}/dashboard/cards`)} className="w-full" size="large" type="dashed" icon={<LuMenu />}>
-            {t("Cards list")}
+          <Button onClick={() => router.push(`/${lang}/dashboard/cards`)} className="w-full flex items-center" size="large" type="dashed" icon={<LuMenu />}>
+            {t("Cards list")}{" "}
+            <Typography.Text className="m-0 p-0 text-sm" type="success">
+              ({allCardsCount})
+            </Typography.Text>
           </Button>
         </Col>
       </Row>
