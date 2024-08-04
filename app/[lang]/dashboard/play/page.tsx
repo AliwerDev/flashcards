@@ -5,21 +5,28 @@ import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Empty, Flex, Space, theme, Typography } from "antd";
 import styled from "@emotion/styled";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useBoolean } from "@/src/hooks/use-boolean";
 import { GoThumbsdown, GoThumbsup } from "react-icons/go";
 import { LuMoveLeft, LuPencil } from "react-icons/lu";
 import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
-import { MdOutlineAdsClick } from "react-icons/md";
+import { MdFullscreen, MdFullscreenExit, MdOutlineAdsClick } from "react-icons/md";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { useQueryClientInstance } from "@/src/context/QueryClient.client";
+import { useSettingsContext } from "@/src/settings/hooks";
 
 const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
+  const icBottonRef = useRef<HTMLButtonElement>(null);
+  const cBottonRef = useRef<HTMLButtonElement>(null);
+  const queryClient = useQueryClientInstance();
+  const fullScreenHandle = useFullScreenHandle();
+  const { theme: clientTheme } = useSettingsContext();
+
   const [activeCard, setActiveCard] = useState<ICard>();
   const showBool = useBoolean();
   const loading = useBoolean();
   const editModalBool = useBoolean();
-  const queryClient = useQueryClientInstance();
 
   const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
   const active_cards: ICard[] = active_cards_data?.data || [];
@@ -51,6 +58,11 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
     editModalBool.onTrue(activeCard);
   };
 
+  const toggleFullScreen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    fullScreenHandle.active ? fullScreenHandle.exit() : fullScreenHandle.enter();
+  };
+
   const { token } = theme.useToken();
   const style = { background: token.colorBgContainer, borderRadius: token.borderRadius, border: "1 px solid", borderColor: token.colorBorder };
 
@@ -60,86 +72,121 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
     }
   }, [active_cards_data]);
 
+  useEffect(() => {
+    const keydown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && icBottonRef.current) {
+        e.preventDefault();
+        icBottonRef.current.click();
+      } else if (e.key === "ArrowRight" && cBottonRef.current) {
+        e.preventDefault();
+        cBottonRef.current.click();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+        showBool.onToggle();
+      }
+    };
+
+    if (window) {
+      window.addEventListener("keydown", keydown);
+    }
+    return () => {
+      if (window) {
+        window.removeEventListener("keydown", keydown);
+      }
+    };
+  }, []);
+
   const absoluteActions = (
     <>
       <Space className="message" align="center">
         <MdOutlineAdsClick color={token.colorTextSecondary} />
-        <Typography.Text type="secondary">{t("Click to show other side!")}</Typography.Text>
+        <Typography.Text className="text-xs" type="secondary">
+          {t("Click to show other side")}
+          <span className="desctop-element">{t(" or just press ⬆ / ⬇ keys")}</span>!
+        </Typography.Text>
       </Space>
-      <Button className="edit-button" onClick={clickEditButton} size="small" type="text" icon={<LuPencil />} />
+      {!fullScreenHandle.active && <Button className="edit-button" onClick={clickEditButton} size="small" type="text" icon={<LuPencil />} />}
+      <Button size="small" className="full-screen-changer" onClick={toggleFullScreen} type="text" icon={fullScreenHandle.active ? <MdFullscreenExit /> : <MdFullscreen />} />
     </>
   );
 
   return (
-    <FlipCard>
-      {active_cards.length <= 0 ? (
-        <Empty
-          description={
-            <div>
-              <Typography.Text type="secondary">{t("You have completed all active cards!")}</Typography.Text>
-              <Button href="/dashboard" icon={<LuMoveLeft />} type="link">
-                {t("Back to home!")}
-              </Button>
-            </div>
-          }
-          rootClassName="mt-10"
-        />
-      ) : (
-        <>
-          <div className="card cursor-pointer mx-auto">
-            <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
-              <div className="card-front">
-                {absoluteActions}
-
-                <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
+    <FullScreen handle={fullScreenHandle}>
+      <FlipCard style={{ background: clientTheme === "dark" ? token.colorBgBase : "#e9ece5" }}>
+        {active_cards.length <= 0 ? (
+          <Empty
+            description={
+              <div>
+                <Typography.Text type="secondary">{t("You have completed all active cards!")}</Typography.Text>
+                <Button href="/dashboard" icon={<LuMoveLeft />} type="link">
+                  {t("Back to home!")}
+                </Button>
               </div>
-              <div className="card-back">
-                {absoluteActions}
-                <Typography.Title level={5}>{activeCard?.back}</Typography.Title>
+            }
+            rootClassName="mt-10"
+          />
+        ) : (
+          <>
+            <div className="card cursor-pointer mx-auto">
+              <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
+                <div className="card-front">
+                  {absoluteActions}
+
+                  <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
+                </div>
+                <div className="card-back">
+                  {absoluteActions}
+                  <Typography.Title level={5}>{activeCard?.back}</Typography.Title>
+                </div>
               </div>
             </div>
-          </div>
 
-          <Flex gap="15px" className="actions">
-            <Button
-              onClick={() => {
-                loading.onTrue("incorrect");
-                playCard(false);
-              }}
-              danger
-              size="large"
-              type="dashed"
-              loading={loading.data === "incorrect"}
-              icon={<GoThumbsdown />}
-            ></Button>
+            <Flex gap="15px" className="actions" wrap>
+              <Button
+                ref={icBottonRef}
+                onClick={() => {
+                  loading.onTrue("incorrect");
+                  playCard(false);
+                }}
+                danger
+                size="large"
+                type="dashed"
+                loading={loading.data === "incorrect"}
+                icon={<GoThumbsdown />}
+              />
 
-            <Button
-              onClick={() => {
-                loading.onTrue("correct");
-                playCard(true);
-              }}
-              loading={loading.data === "correct"}
-              size="large"
-              type="dashed"
-              icon={<GoThumbsup />}
-            ></Button>
-          </Flex>
-        </>
-      )}
-
-      <AddEditCardModal openBool={editModalBool} t={t} inPlayPage />
-    </FlipCard>
+              <Button
+                ref={cBottonRef}
+                onClick={() => {
+                  loading.onTrue("correct");
+                  playCard(true);
+                }}
+                loading={loading.data === "correct"}
+                size="large"
+                type="dashed"
+                icon={<GoThumbsup />}
+              />
+              <Typography.Text type="secondary" className="w-full text-center desctop-element text-xs">
+                {t("Or just press ⬅ / ➡️ keys!")}
+              </Typography.Text>
+            </Flex>
+          </>
+        )}
+        <AddEditCardModal openBool={editModalBool} t={t} inPlayPage />
+      </FlipCard>
+    </FullScreen>
   );
 };
 
 const FlipCard = styled.div`
   height: 100%;
+  min-height: 80vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-top: -64px;
 
   .card {
+    margin-top: -64px;
     perspective: 1000px;
     position: relative;
     z-index: 15;
@@ -182,11 +229,19 @@ const FlipCard = styled.div`
       gap: 10px;
     }
 
-    .message {
+    .full-screen-changer {
       position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      right: 10px;
+      bottom: 10px;
+    }
+
+    .message {
+      width: 100%;
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      bottom: 10px;
+      left: 0;
     }
 
     .card-back {
@@ -202,12 +257,20 @@ const FlipCard = styled.div`
 
     button {
       flex: 1;
-      display: block;
+      display: flex;
       height: 50px;
+      flex-direction: column;
+      align-items: center;
       svg {
         width: 30px;
         height: 30px;
       }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .desctop-element {
+      display: none !important;
     }
   }
 `;

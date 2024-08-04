@@ -38,9 +38,17 @@ const AntdProvider = ({ children, lang }: Props) => {
               wireframe: false,
             },
         algorithm: isDarkMode ? [theme.darkAlgorithm] : [theme.defaultAlgorithm],
+
+        components: {
+          Menu: {
+            colorInfoActive: "#ffffff",
+            itemActiveBg: "#52c41a",
+            colorBgTextActive: "#52c41a",
+          },
+        },
       }}
     >
-      <StyleProvider hashPriority="low">{children}</StyleProvider>
+      <StyleProvider>{children}</StyleProvider>
     </ConfigProvider>
   );
 };

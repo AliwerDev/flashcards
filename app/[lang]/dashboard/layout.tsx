@@ -9,9 +9,10 @@ import { AuthGuard } from "@/src/auth/guard";
 import { useTranslation } from "@/app/i18/client";
 import ProfileItem from "@/app/components/dashboard/profile-item";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { GoPlus, GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
+import { usePathname, useRouter } from "next/navigation";
+import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import SimpleBar from "simplebar-react";
+import get from "lodash.get";
 
 const { Header, Sider, Content } = Layout;
 
@@ -25,6 +26,7 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
   const pathname = usePathname();
   const { t } = useTranslation(lang);
   const menus = useDashboardMenus();
+  const router = useRouter();
 
   const breadcrumbItems = generateBreadcrumbs(pathname);
 
@@ -32,24 +34,22 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const logo = (
-    <div className="w-full flex justify-start px-2 my-3 cursor-pointer">
-      <Image className="max-h-10 min-h-10" src={sidebar_collapsed ? "/assets/logo/logo-mini.svg" : "/assets/logo/flashcards1.svg"} alt="flashcards" height={40} width={180} />
-    </div>
+  const selectedMenuKey: string = get(
+    menus.find((menu) => menu.key && pathname.endsWith(menu.key)),
+    "key",
+    ""
   );
 
-  const addCategoryButton = (
-    <Space className="w-full justify-center mt-3">
-      <Button size="large" type="dashed" icon={<GoPlus />}>
-        {t("Add new category")}
-      </Button>
-    </Space>
+  const logo = (
+    <div className="w-full flex justify-start px-2 my-3 cursor-pointer">
+      <Image className="max-h-10 min-h-10" src="/assets/logo/flashcards1.svg" alt="flashcards" height={40} width={180} />
+    </div>
   );
 
   return (
     <AuthGuard lang={lang}>
       <Layout className="h-screen">
-        <Drawer placement="left" onClose={() => updateData({ sidebar_collapsed: true })} open={!sidebar_collapsed} closable={false} rootClassName="block md:hidden" styles={{ body: { padding: "10px 0" }, header: { paddingBlock: 10 } }} width={200}>
+        <Drawer placement="left" onClose={() => updateData({ sidebar_collapsed: true })} open={!sidebar_collapsed} closable={false} rootClassName="block md:hidden" styles={{ body: { padding: "10px 0", background: colorBgContainer }, header: { paddingBlock: 10 } }} width={200}>
           {logo}
           <Menu
             style={{
@@ -57,10 +57,10 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
               borderRadius: borderRadiusLG,
             }}
             theme={apptheme}
-            defaultSelectedKeys={["1"]}
+            onSelect={(menu: any) => router.push(`/${lang}/dashboard/${menu.key}`)}
+            defaultSelectedKeys={[selectedMenuKey]}
             items={menus}
           />
-          {addCategoryButton}
         </Drawer>
 
         <Sider
@@ -68,12 +68,9 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
           }}
-          collapsible
-          collapsedWidth="0"
           theme={apptheme}
           onCollapse={() => updateData({ sidebar_collapsed: !sidebar_collapsed })}
           className="hidden md:block"
-          collapsed={sidebar_collapsed}
           trigger={null}
           zeroWidthTriggerStyle={{ background: colorBgContainer }}
         >
@@ -85,15 +82,15 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             }}
             theme={apptheme}
             mode="inline"
-            defaultSelectedKeys={["1"]}
             items={menus}
+            defaultSelectedKeys={[selectedMenuKey]}
+            onSelect={(menu: any) => router.push(`/${lang}/dashboard/${menu.key}`)}
           />
-          {addCategoryButton}
         </Sider>
         <Layout>
-          <Header className="pr-4 pl-0 flex justify-between items-center" style={{ background: colorBgContainer }}>
+          <Header className="px-3 flex justify-between items-center" style={{ background: colorBgContainer }}>
             <Flex align="center" gap={5}>
-              <Button type="text" onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} icon={sidebar_collapsed ? <GoSidebarCollapse className="text-lg" /> : <GoSidebarExpand className="text-lg" />} />
+              <Button type="text" className="block md:hidden" onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} icon={sidebar_collapsed ? <GoSidebarCollapse className="text-lg" /> : <GoSidebarExpand className="text-lg" />} />
               <Breadcrumb items={breadcrumbItems} />
             </Flex>
             <Flex gap="15px" align="center">
@@ -103,9 +100,9 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             </Flex>
           </Header>
 
-          <Content className="p-2 sm:p-4 md:p-4" style={{ height: "calc(100vh - 64px)", overflowY: "auto" }}>
-            {children}
-          </Content>
+          <SimpleBar style={{ maxHeight: "calc(100vh - 64px)" }}>
+            <Content className="p-2 sm:p-4 md:p-4">{children}</Content>
+          </SimpleBar>
         </Layout>
       </Layout>
     </AuthGuard>

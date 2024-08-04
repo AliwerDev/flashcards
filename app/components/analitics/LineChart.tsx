@@ -1,142 +1,107 @@
 "use client";
-import { useSettingsContext } from "@/src/settings/hooks";
 import { IReview } from "@/src/types/other";
-import React from "react";
-import dynamic from "next/dynamic";
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-import styled from "@emotion/styled";
-import { theme as antTheme } from "antd";
-import { alpha, bgBlur } from "@/src/auth/context/utils";
+import { LineChart as ReLineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+
+import React, { useEffect, useRef, useState } from "react";
+import { theme as antTheme, Card, Typography } from "antd";
+import dayjs from "dayjs";
+import { TFunction } from "i18next";
+import { ICard } from "@/src/types/card";
+import { t } from "i18next";
 
 interface LineChartProps {
   data: IReview[];
+  cards: ICard[];
+  t: TFunction;
+  title?: string;
 }
 
-const LineChart: React.FC<LineChartProps> = ({ data }) => {
-  const { theme } = useSettingsContext();
-
+const LineChart: React.FC<LineChartProps> = ({ data, cards, title }) => {
   const { token } = antTheme.useToken();
+  const datesMap = new Map();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(300);
 
   // Process data
-  const dates = Array.from(new Set(data.map((item) => new Date(item.reviewDate).toLocaleDateString())));
-  const correctReviews = dates.map((date) => data.filter((item) => item.correct && new Date(item.reviewDate).toLocaleDateString() === date).length);
-  const incorrectReviews = dates.map((date) => data.filter((item) => !item.correct && new Date(item.reviewDate).toLocaleDateString() === date).length);
+  data.forEach((item) => {
+    const date = new Date(item.reviewDate).toLocaleDateString();
+    if (!datesMap.has(date)) {
+      datesMap.set(date, { cr: 0, icr: 0, new: 0 });
+    }
+    const counts = datesMap.get(date);
+    if (item.correct) {
+      counts.cr += 1;
+    } else {
+      counts.icr += 1;
+    }
+  });
 
-  const chartData = {
-    theme: {
-      mode: theme,
-      palette: "palette1",
-      monochrome: {
-        enabled: true,
-        color: theme === "light" ? "#333" : "#fff",
-      },
-    },
-    series: [
-      {
-        name: "Correct Reviews",
-        data: correctReviews,
-        color: "#0eb132",
-      },
-      {
-        name: "Incorrect Reviews",
-        data: incorrectReviews,
-        color: "#F44336",
-      },
-    ],
-    options: {
-      chart: {
-        type: "line" as "line",
-        height: 350,
-        zoom: {
-          enabled: false,
-        },
-        toolbar: {
-          show: false,
-        },
-      },
-      dataLabels: {
-        enabled: false,
-      },
+  cards.forEach((item) => {
+    const date = new Date(item.createdAt).toLocaleDateString();
+    if (!datesMap.has(date)) {
+      datesMap.set(date, { cr: 0, icr: 0, new: 1 });
+    } else {
+      const dateData = datesMap.get(date);
+      dateData.new += 1;
+    }
+  });
 
-      xaxis: {
-        categories: dates,
-      },
-      stroke: {
-        width: [1, 1],
-      },
-      markers: {
-        size: 0,
-      },
-      legend: {
-        position: "top" as "top",
-      },
-      fill: {
-        opacity: 1,
-        colors: ["#0eb132", "#F44336", ""],
-      },
-    },
+  const values = Array.from(datesMap, ([date, data]) => ({
+    name: dayjs(date).format("D MMM"),
+    cr: data.cr,
+    icr: data.icr,
+    new: data.new,
+  }));
+
+  const tooltipStyle = { background: token.colorBgBase, boxShadow: token.boxShadow, borderRadius: token.borderRadius, borderColor: token.colorBorder };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={tooltipStyle} className="p-1 flex flex-col">
+          <Typography.Text className="text-sm text-[#1db8f0]">{`New cards: ${payload[0].value}`}</Typography.Text>
+          <Typography.Text className="text-sm" type="success" color="success">{`Correct reviews: ${payload[1].value}`}</Typography.Text>
+          <Typography.Text className="text-sm" type="danger">{`Incorrect reviews: ${payload[2].value}`}</Typography.Text>
+        </div>
+      );
+    }
+
+    return null;
   };
 
-  return <StyledChart token={token} options={chartData.options} series={chartData.series} type="line" height={350} />;
+  useEffect(() => {
+    if (cardRef.current) {
+      const cardWidth = cardRef.current.offsetWidth;
+      setWidth(cardWidth);
+    }
+  }, [cardRef]);
+
+  return (
+    <Card className="my-5" classNames={{ body: "!p-2" }}>
+      <Typography.Title level={5} className="text-center mt-0 my-3">
+        {title ? title : t("Your statistics")}
+      </Typography.Title>
+      <div className="max-w-full overflow-hidden" ref={cardRef}>
+        <ReLineChart
+          width={width}
+          height={300}
+          data={values}
+          margin={{
+            left: -30,
+            bottom: -10,
+          }}
+        >
+          <CartesianGrid stroke={token.colorTextDisabled} strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip content={CustomTooltip} contentStyle={tooltipStyle} />
+          <Line type="linear" dataKey="new" stroke="#1db8f0" activeDot={{ r: 4 }} />
+          <Line type="linear" dataKey="cr" stroke="#49aa19" activeDot={{ r: 4 }} />
+          <Line type="linear" dataKey="icr" stroke="#dc4446" activeDot={{ r: 4 }} />
+        </ReLineChart>
+      </div>
+    </Card>
+  );
 };
-
-const StyledChart = styled(Chart)(({ token }) => {
-  return {
-    "& .apexcharts-canvas": {
-      // Tooltip
-      "& .apexcharts-tooltip": {
-        ...bgBlur({
-          color: token.colorTextDisabled,
-        }),
-        color: token.colorTextDisabled,
-        boxShadow: token.boxShadowSecondary,
-        borderRadius: token.borderRadius * 1.25,
-        "&.apexcharts-theme-light": {
-          borderColor: "transparent",
-          ...bgBlur({
-            color: token.colorTextDisabled,
-          }),
-        },
-      },
-      "& .apexcharts-xaxistooltip": {
-        ...bgBlur({
-          color: token.colorBgContainer,
-        }),
-        borderColor: "transparent",
-        color: token.colorTextDisabled,
-        boxShadow: token.boxShadowSecondary,
-        borderRadius: token.borderRadius * 1.25,
-        "&:before": {
-          borderBottomColor: alpha(token.colorTextDisabled, 0.24),
-        },
-        "&:after": {
-          borderBottomColor: alpha(token.colorTextDisabled, 0.8),
-        },
-      },
-      "& .apexcharts-tooltip-title": {
-        textAlign: "center",
-        fontWeight: 400,
-        backgroundColor: alpha(token.colorTextSecondary, 0.08),
-        color: token.colorText,
-      },
-
-      // LEGEND
-      "& .apexcharts-legend": {
-        padding: 0,
-      },
-      "& .apexcharts-legend-series": {
-        display: "inline-flex !important",
-        alignItems: "center",
-      },
-      "& .apexcharts-legend-marker": {
-        marginRight: 8,
-      },
-      "& .apexcharts-legend-text": {
-        lineHeight: "18px",
-        textTransform: "capitalize",
-      },
-    },
-  };
-});
 
 export default LineChart;

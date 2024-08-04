@@ -1,11 +1,11 @@
-const withPWA = require("next-pwa")({
+const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
 });
 
-const nextConfig = {
+module.exports = withPWA({
   env: {
     // HOST_API: "http://localhost:2020/api", //localhost
     // HOST_API: "http://95.130.227.142:2020/api", //husanboy
@@ -15,6 +15,4 @@ const nextConfig = {
     GOOGLE_CLIENT_ID: "990218029399-hm5qqkijnueabi48ukp39dqitm6980ds.apps.googleusercontent.com",
     GITHUB_CLIENT_ID: "Ov23liTicJ1k2HOx2jNp",
   },
-};
-
-module.exports = withPWA(nextConfig);
+});

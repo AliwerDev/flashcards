@@ -8,12 +8,11 @@ import { IBox } from "@/src/types/box";
 import { ICard } from "@/src/types/card";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Col, Input, List, Row, Segmented, Select, theme, Typography } from "antd";
+import { Button, Col, Input, List, Row, Segmented, Select, theme } from "antd";
 import debounce from "lodash.debounce";
 import React, { useMemo } from "react";
 import { LuPencil, LuSearch } from "react-icons/lu";
 import styled from "@emotion/styled";
-import SimpleBar from "simplebar-react";
 
 const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
@@ -63,19 +62,17 @@ const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
         </Row>
       </div>
 
-      <SimpleBar style={{ maxHeight: "calc(100% - 58px)" }}>
-        <List
-          style={{ backgroundColor: colorBgContainer }}
-          bordered
-          loading={isLoadingCards}
-          dataSource={filteredCards}
-          renderItem={(item, i) => (
-            <List.Item actions={[<Button onClick={() => editCardBool.onTrue(item)} type="text" icon={<LuPencil />} />]}>
-              {i + 1}. {item.front}
-            </List.Item>
-          )}
-        />
-      </SimpleBar>
+      <List
+        style={{ backgroundColor: colorBgContainer }}
+        bordered
+        loading={isLoadingCards}
+        dataSource={filteredCards}
+        renderItem={(item, i) => (
+          <List.Item actions={[<Button onClick={() => editCardBool.onTrue(item)} type="text" icon={<LuPencil />} />]}>
+            {i + 1}. {item.front}
+          </List.Item>
+        )}
+      />
 
       <AddEditCardModal {...{ boxes, t }} openBool={editCardBool} />
     </Styled>
@@ -83,12 +80,10 @@ const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
 };
 
 const Styled = styled.div`
-  height: 100%;
-  max-height: 100%;
-  overflow: hidden;
-
   .card-list-header {
     margin-bottom: 10px;
+    position: sticky;
+    top: 0;
   }
 
   .ant-empty {
