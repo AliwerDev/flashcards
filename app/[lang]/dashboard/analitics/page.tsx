@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Col, Row } from "antd";
 import React from "react";
 
-const AnaliticsPage = ({ lang }: { lang: string }) => {
+const AnaliticsPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
   const { data } = useQuery({ queryKey: ["reviews"], queryFn: () => axiosInstance.get(endpoints.card.reviews) });
   const { data: cardsList } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
