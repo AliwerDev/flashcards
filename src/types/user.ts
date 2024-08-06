@@ -3,4 +3,7 @@ export interface IUser {
   firstName: string;
   lastName: string;
   email: string;
+  picture: string;
+  role: string;
+  cardsCount?: number;
 }

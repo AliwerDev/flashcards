@@ -1,5 +1,6 @@
 "use client";
 import LineChart from "@/app/components/analitics/LineChart";
+import ReviewsPieChart from "@/app/components/analitics/ReviewsPieChart";
 import { useTranslation } from "@/app/i18/client";
 import { ICard } from "@/src/types/card";
 import { IReview } from "@/src/types/other";
@@ -19,13 +20,14 @@ const AnaliticsPage = ({ params: { lang } }: { params: { lang: string } }) => {
 
   return (
     <div>
-      <Row>
-        <Col xs={12}></Col>
+      <Row gutter={[15, 15]}>
+        <Col xs={24} lg={16}>
+          <LineChart title={t("Analitics")} t={t} data={reviews} cards={cards} />
+        </Col>
+        <Col xs={24} lg={8}>
+          <ReviewsPieChart title={t("All reviews")} t={t} reviews={reviews} />
+        </Col>
       </Row>
-
-      <LineChart title={t("Analitics")} t={t} data={reviews} cards={cards} />
-
-      <LineChart title={t("Analitics")} t={t} data={reviews} cards={cards} />
     </div>
   );
 };

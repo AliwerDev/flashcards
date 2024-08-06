@@ -84,7 +84,10 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             mode="inline"
             items={menus}
             defaultSelectedKeys={[selectedMenuKey]}
-            onSelect={(menu: any) => router.push(`/${lang}/dashboard/${menu.key}`)}
+            onSelect={(menu: any) => {
+              console.log(menu);
+              router.push(`/${lang}/dashboard/${menu.key}`);
+            }}
           />
         </Sider>
         <Layout>

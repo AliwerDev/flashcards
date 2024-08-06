@@ -4,7 +4,6 @@ import { LineChart as ReLineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } 
 
 import React, { useEffect, useRef, useState } from "react";
 import { theme as antTheme, Card, Typography } from "antd";
-import dayjs from "dayjs";
 import { TFunction } from "i18next";
 import { ICard } from "@/src/types/card";
 import { t } from "i18next";
@@ -47,7 +46,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, cards, title }) => {
   });
 
   const values = Array.from(datesMap, ([date, data]) => ({
-    name: dayjs(date).format("D MMM"),
+    name: date,
     cr: data.cr,
     icr: data.icr,
     new: data.new,
@@ -87,7 +86,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, cards, title }) => {
           height={300}
           data={values}
           margin={{
-            left: -30,
+            left: -20,
             bottom: -10,
           }}
         >

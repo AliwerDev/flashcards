@@ -37,6 +37,8 @@ export const fetcher = async (args: string | [string, AxiosRequestConfig]) => {
 export const endpoints = {
   user: {
     me: "/user/me",
+    list: "/user/list",
+    role: "/user/role",
     editProfile: "/user/edit-profile",
     changePassword: "/user/change-password",
   },

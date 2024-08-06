@@ -15,7 +15,7 @@ type RoleBasedGuardProp = {
 
 const { Text, Title } = Typography;
 
-export default function RoleBasedGuard({ hasContent, roles, children }: RoleBasedGuardProp) {
+export default function RoleBasedGuard({ hasContent = true, roles, children }: RoleBasedGuardProp) {
   const { user } = useAuthContext();
 
   const currentRole = user?.role;
