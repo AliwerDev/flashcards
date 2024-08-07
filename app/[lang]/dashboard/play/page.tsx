@@ -14,6 +14,11 @@ import { MdFullscreen, MdFullscreenExit, MdOutlineAdsClick } from "react-icons/m
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { useQueryClientInstance } from "@/src/context/QueryClient.client";
 import { useSettingsContext } from "@/src/settings/hooks";
+import { IBox } from "@/src/types/box";
+import get from "lodash.get";
+import { HiSpeakerWave } from "react-icons/hi2";
+import { removeParentheses } from "@/src/auth/context/utils";
+import useChangeableSpeech from "@/src/hooks/use-speach";
 
 const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
@@ -23,15 +28,19 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const fullScreenHandle = useFullScreenHandle();
   const { theme: clientTheme } = useSettingsContext();
 
+  const speacher = useChangeableSpeech();
+
   const [activeCard, setActiveCard] = useState<ICard>();
   const showBool = useBoolean();
   const loading = useBoolean();
   const editModalBool = useBoolean();
 
   const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
+  const { data: boxes_data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list) });
   const active_cards: ICard[] = active_cards_data?.data || [];
+  const boxesObject = makeBoxesObject(boxes_data?.data);
 
-  const { mutate: playCard } = useMutation({
+  const { mutate: playCard, isPending } = useMutation({
     mutationKey: ["add-box"],
     mutationFn: (correct: boolean) => axiosInstance.post(endpoints.card.play, { cardId: activeCard?._id, correct }),
     onSuccess: (_, variables) => {
@@ -45,6 +54,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
           changed_active_cards.push(playedCard[0]);
         }
         setActiveCard(changed_active_cards[0]);
+        speacher.setText(removeParentheses(changed_active_cards[0]?.front));
         showBool.onFalse();
         loading.onFalse();
         return { ...oldData, data: changed_active_cards };
@@ -63,12 +73,23 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
     fullScreenHandle.active ? fullScreenHandle.exit() : fullScreenHandle.enter();
   };
 
+  const handlePlay = (text: string) => (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // const synth = window.speechSynthesis;
+    // synth.cancel();
+    // const utterance = new SpeechSynthesisUtterance(removeParentheses(text));
+    // synth.speak(utterance);
+    speacher.start();
+  };
+
   const { token } = theme.useToken();
   const style = { background: token.colorBgContainer, borderRadius: token.borderRadius, border: "1 px solid", borderColor: token.colorBorder };
 
   useEffect(() => {
     if (active_cards.length > 0) {
       setActiveCard(active_cards[0]);
+      speacher.setText(removeParentheses(active_cards[0]?.front));
     }
   }, [active_cards_data]);
 
@@ -105,8 +126,16 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
           <span className="desctop-element">{t(" or just press ⬆ / ⬇ keys")}</span>!
         </Typography.Text>
       </Space>
-      {!fullScreenHandle.active && <Button className="edit-button" onClick={clickEditButton} size="small" type="text" icon={<LuPencil />} />}
-      <Button size="small" className="full-screen-changer" onClick={toggleFullScreen} type="text" icon={fullScreenHandle.active ? <MdFullscreenExit /> : <MdFullscreen />} />
+      <Typography.Text className="card-box text-sm" type="secondary">
+        {get(boxesObject, `[${activeCard?.boxId}].level`)} - {t("Level")}
+      </Typography.Text>
+
+      <Space className="edit-button">
+        {!fullScreenHandle.active && <Button size="small" onClick={clickEditButton} type="dashed" icon={<LuPencil />} />}
+        <Button size="small" onClick={toggleFullScreen} type="dashed" icon={fullScreenHandle.active ? <MdFullscreenExit /> : <MdFullscreen />} />
+      </Space>
+
+      {activeCard && <Button className="play-button" onClick={handlePlay(activeCard?.front)} type="dashed" icon={<HiSpeakerWave />} />}
     </>
   );
 
@@ -131,7 +160,6 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
               <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
                 <div className="card-front">
                   {absoluteActions}
-
                   <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
                 </div>
                 <div className="card-back">
@@ -145,6 +173,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
               <Button
                 ref={icBottonRef}
                 onClick={() => {
+                  if (isPending) return;
                   loading.onTrue("incorrect");
                   playCard(false);
                 }}
@@ -158,6 +187,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
               <Button
                 ref={cBottonRef}
                 onClick={() => {
+                  if (isPending) return;
                   loading.onTrue("correct");
                   playCard(true);
                 }}
@@ -176,6 +206,15 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
       </FlipCard>
     </FullScreen>
   );
+};
+
+const makeBoxesObject = (list: IBox[] = []) => {
+  const obj: any = {};
+  list.forEach((item, index) => {
+    obj[item._id] = { ...item, level: index + 1 };
+  });
+
+  return obj;
 };
 
 const FlipCard = styled.div`
@@ -229,7 +268,14 @@ const FlipCard = styled.div`
       gap: 10px;
     }
 
-    .full-screen-changer {
+    .card-box {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .play-button {
       position: absolute;
       right: 10px;
       bottom: 10px;

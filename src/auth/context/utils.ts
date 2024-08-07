@@ -58,3 +58,7 @@ export function bgBlur(props?: BgBlurProps) {
     backgroundColor: alpha(color, opacity),
   };
 }
+
+export function removeParentheses(text: string) {
+  return text.replace(/\(.*?\)/g, "");
+}
