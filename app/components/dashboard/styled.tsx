@@ -5,6 +5,7 @@ export const Styled = styled.div`
     min-height: 85vh;
     display: grid;
     grid-template-rows: auto max-content;
+    grid-template-columns: 100%;
   }
 
   .main-content {
