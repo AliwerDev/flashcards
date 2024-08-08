@@ -8,24 +8,28 @@
   "short_name": "Flashcards",
   "icons": [
     {
-      "src": "/logo/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "favicon/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/logo/icon-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png"
+      "src": "favicon/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/logo/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png"
+      "src": "favicon/favicon.ico",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/logo/icon-512x512.png",
+      "src": "favicon/favicon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ]
 }

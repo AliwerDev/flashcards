@@ -54,10 +54,11 @@ const LineChart: React.FC<LineChartProps> = ({ data, cards, title }) => {
 
   const tooltipStyle = { background: token.colorBgBase, boxShadow: token.boxShadow, borderRadius: token.borderRadius, borderColor: token.colorBorder };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div style={tooltipStyle} className="p-1 flex flex-col">
+          <Typography.Text className="text-sm text-center">{label}</Typography.Text>
           <Typography.Text className="text-sm text-[#1db8f0]">{`New cards: ${payload[0].value}`}</Typography.Text>
           <Typography.Text className="text-sm" type="success" color="success">{`Correct reviews: ${payload[1].value}`}</Typography.Text>
           <Typography.Text className="text-sm" type="danger">{`Incorrect reviews: ${payload[2].value}`}</Typography.Text>

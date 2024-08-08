@@ -13,11 +13,13 @@ import { minSeconds } from "@/src/utils/others";
 import { LuMenu, LuPlay, LuPlus } from "react-icons/lu";
 import { ICard } from "@/src/types/card";
 import AddEditCardModal from "@/app/components/dashboard/add-edit-card-modal";
+import { motion } from "framer-motion";
 
 import { useRouter } from "next/navigation";
 import LineChart from "@/app/components/analitics/LineChart";
 import get from "lodash.get";
 import { useQueryClientInstance } from "@/src/context/QueryClient.client";
+import { defaultTransition } from "@/src/utils/constants";
 
 const { Text, Title } = Typography;
 
@@ -72,7 +74,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
           {isFetchingBoxes
             ? new Array(4).fill("-").map((_, i) => <Skeleton.Node key={i} active />)
             : boxes.map((box, i) => (
-                <div key={box._id} className="box">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={defaultTransition} key={box._id} className="box">
                   <Text type="success" className="align-middle">
                     {i + 1}
                   </Text>
@@ -90,7 +92,7 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
                     <IoReload />
                     {minSeconds(box.reviewInterval * 60, t)}
                   </Text>
-                </div>
+                </motion.div>
               ))}
         </div>
       </Flex>
@@ -103,24 +105,30 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
         ) : null}
 
         <Col xs={24} md={12} lg={6} xl={4}>
-          <Button onClick={() => createEditCardBool.onTrue()} className="w-full" size="large" type="dashed" icon={<LuPlus />}>
-            {t("Add card")}
-          </Button>
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={defaultTransition}>
+            <Button onClick={() => createEditCardBool.onTrue()} className="w-full" size="large" type="dashed" icon={<LuPlus />}>
+              {t("Add card")}
+            </Button>
+          </motion.div>
         </Col>
 
         <Col xs={24} md={12} lg={6} xl={4}>
-          <Badge className="w-full" count={active_cards.length}>
-            {startButton}
-          </Badge>
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={defaultTransition}>
+            <Badge className="w-full" count={active_cards.length}>
+              {startButton}
+            </Badge>
+          </motion.div>
         </Col>
 
         <Col xs={24} md={12} lg={6} xl={4}>
-          <Button onClick={() => router.push(`/${lang}/dashboard/cards`)} className="w-full flex items-center" size="large" type="dashed" icon={<LuMenu />}>
-            {t("Cards list")}{" "}
-            <Typography.Text className="m-0 p-0 text-sm" type="success">
-              ({cards.length})
-            </Typography.Text>
-          </Button>
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={defaultTransition}>
+            <Button onClick={() => router.push(`/${lang}/dashboard/cards`)} className="w-full flex items-center" size="large" type="dashed" icon={<LuMenu />}>
+              {t("Cards list")}{" "}
+              <Typography.Text className="m-0 p-0 text-sm" type="success">
+                ({cards.length})
+              </Typography.Text>
+            </Button>{" "}
+          </motion.div>
         </Col>
       </Row>
 

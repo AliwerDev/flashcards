@@ -3,7 +3,7 @@ import { useTranslation } from "@/app/i18/client";
 import { ICard } from "@/src/types/card";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Empty, Flex, Space, theme, Typography } from "antd";
+import { Button, Empty, Flex, Skeleton, Space, Spin, theme, Typography } from "antd";
 import styled from "@emotion/styled";
 import React, { useEffect, useRef, useState } from "react";
 import { useBoolean } from "@/src/hooks/use-boolean";
@@ -18,7 +18,28 @@ import { IBox } from "@/src/types/box";
 import get from "lodash.get";
 import { HiSpeakerWave } from "react-icons/hi2";
 import { removeParentheses } from "@/src/auth/context/utils";
+import { motion } from "framer-motion";
 import useChangeableSpeech from "@/src/hooks/use-speach";
+
+const container = {
+  hidden: { opacity: 1, scale: 0 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delayChildren: 0.3,
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const item = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+  },
+};
 
 const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
@@ -35,7 +56,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const loading = useBoolean();
   const editModalBool = useBoolean();
 
-  const { data: active_cards_data } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
+  const { data: active_cards_data, isLoading } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
   const { data: boxes_data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list) });
   const active_cards: ICard[] = active_cards_data?.data || [];
   const boxesObject = makeBoxesObject(boxes_data?.data);
@@ -76,10 +97,6 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const handlePlay = (text: string) => (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    // const synth = window.speechSynthesis;
-    // synth.cancel();
-    // const utterance = new SpeechSynthesisUtterance(removeParentheses(text));
-    // synth.speak(utterance);
     speacher.start();
   };
 
@@ -126,11 +143,11 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
           <span className="desctop-element">{t(" or just press ⬆ / ⬇ keys")}</span>!
         </Typography.Text>
       </Space>
-      <Typography.Text className="card-box text-sm" type="secondary">
-        {get(boxesObject, `[${activeCard?.boxId}].level`)} - {t("Level")}
-      </Typography.Text>
 
       <Space className="edit-button">
+        <Typography.Text className="text-sm" type="secondary">
+          {t("Level")}: {get(boxesObject, `[${activeCard?.boxId}].level`)}
+        </Typography.Text>
         {!fullScreenHandle.active && <Button size="small" onClick={clickEditButton} type="dashed" icon={<LuPencil />} />}
         <Button size="small" onClick={toggleFullScreen} type="dashed" icon={fullScreenHandle.active ? <MdFullscreenExit /> : <MdFullscreen />} />
       </Space>
@@ -142,7 +159,11 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   return (
     <FullScreen handle={fullScreenHandle}>
       <FlipCard style={{ background: clientTheme === "dark" ? token.colorBgBase : "#e9ece5" }}>
-        {active_cards.length <= 0 ? (
+        {isLoading ? (
+          <div className="h-[300px] grid place-items-center">
+            <Spin />
+          </div>
+        ) : active_cards.length <= 0 ? (
           <Empty
             description={
               <div>
@@ -155,52 +176,60 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
             rootClassName="mt-10"
           />
         ) : (
-          <>
-            <div className="card cursor-pointer mx-auto">
-              <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
-                <div className="card-front">
-                  {absoluteActions}
-                  <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
+          <motion.div initial="hidden" animate="visible" variants={container}>
+            <motion.div variants={item}>
+              <motion.div className="card cursor-pointer mx-auto" key={activeCard ? activeCard.front : "empty"} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -10, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
+                  <div className="card-front">
+                    {absoluteActions}
+                    <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
+                  </div>
+
+                  <div className="card-back">
+                    {absoluteActions}
+                    <Typography.Title level={5}>{activeCard?.back}</Typography.Title>
+                  </div>
                 </div>
-                <div className="card-back">
-                  {absoluteActions}
-                  <Typography.Title level={5}>{activeCard?.back}</Typography.Title>
-                </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             <Flex gap="15px" className="actions" wrap>
-              <Button
-                ref={icBottonRef}
-                onClick={() => {
-                  if (isPending) return;
-                  loading.onTrue("incorrect");
-                  playCard(false);
-                }}
-                danger
-                size="large"
-                type="dashed"
-                loading={loading.data === "incorrect"}
-                icon={<GoThumbsdown />}
-              />
-
-              <Button
-                ref={cBottonRef}
-                onClick={() => {
-                  if (isPending) return;
-                  loading.onTrue("correct");
-                  playCard(true);
-                }}
-                loading={loading.data === "correct"}
-                size="large"
-                type="dashed"
-                icon={<GoThumbsup />}
-              />
-              <Typography.Text type="secondary" className="w-full text-center desctop-element text-xs">
-                {t("Or just press ⬅ / ➡️ keys!")}
-              </Typography.Text>
+              <motion.div className="flex-1" variants={item}>
+                <Button
+                  ref={icBottonRef}
+                  onClick={() => {
+                    if (isPending) return;
+                    loading.onTrue("incorrect");
+                    playCard(false);
+                  }}
+                  danger
+                  size="large"
+                  type="dashed"
+                  loading={loading.data === "incorrect"}
+                  icon={<GoThumbsdown />}
+                />
+              </motion.div>
+              <motion.div className="flex-1" variants={item}>
+                <Button
+                  ref={cBottonRef}
+                  onClick={() => {
+                    if (isPending) return;
+                    loading.onTrue("correct");
+                    playCard(true);
+                  }}
+                  loading={loading.data === "correct"}
+                  size="large"
+                  type="dashed"
+                  icon={<GoThumbsup />}
+                />
+              </motion.div>
+              <motion.div variants={item} className="w-full text-center">
+                <Typography.Text type="secondary" className="desctop-element text-xs">
+                  {t("Or just press ⬅ / ➡️ keys!")}
+                </Typography.Text>
+              </motion.div>
             </Flex>
-          </>
+          </motion.div>
         )}
         <AddEditCardModal openBool={editModalBool} t={t} inPlayPage />
       </FlipCard>
@@ -268,13 +297,6 @@ const FlipCard = styled.div`
       gap: 10px;
     }
 
-    .card-box {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
     .play-button {
       position: absolute;
       right: 10px;
@@ -303,6 +325,7 @@ const FlipCard = styled.div`
 
     button {
       flex: 1;
+      width: 100%;
       display: flex;
       height: 50px;
       flex-direction: column;
