@@ -166,19 +166,6 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
 
       <AddEditCardModal {...{ boxes, t }} openBool={createEditCardBool} />
       <AddBoxModal t={t} open={createBoxBool} />
-
-      <ul className="circles">
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
     </Styled>
   );
 };
