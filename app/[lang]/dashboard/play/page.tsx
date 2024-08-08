@@ -20,7 +20,7 @@ import { removeParentheses } from "@/src/auth/context/utils";
 import { motion } from "framer-motion";
 import useChangeableSpeech from "@/src/hooks/use-speach";
 import { FlipCardStyled } from "./styled";
-import FireFlies from "@/app/components/dashboard/firefly";
+import FireFlies from "@/app/components/animations/firefly";
 import { LiaExchangeAltSolid } from "react-icons/lia";
 
 const container = {
