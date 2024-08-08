@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import useChangeableSpeech from "@/src/hooks/use-speach";
 import { FlipCardStyled } from "./styled";
 import FireFlies from "@/app/components/dashboard/firefly";
+import { LiaExchangeAltSolid } from "react-icons/lia";
 
 const container = {
   hidden: { opacity: 1, scale: 0 },
@@ -54,6 +55,7 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
 
   const [activeCard, setActiveCard] = useState<ICard>();
   const showBool = useBoolean();
+  const reverceRenderBool = useBoolean();
   const loading = useBoolean();
   const editModalBool = useBoolean();
 
@@ -95,8 +97,12 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
     fullScreenHandle.active ? fullScreenHandle.exit() : fullScreenHandle.enter();
   };
 
-  const handlePlay = (text: string) => (e: any) => {
-    e.preventDefault();
+  const toggleReverce = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    reverceRenderBool.onToggle();
+  };
+
+  const handlePlay = (e: any) => {
     e.stopPropagation();
     speacher.start();
   };
@@ -151,9 +157,10 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
         </Typography.Text>
         {!fullScreenHandle.active && <Button size="small" onClick={clickEditButton} type="dashed" icon={<LuPencil />} />}
         <Button size="small" onClick={toggleFullScreen} type="dashed" icon={fullScreenHandle.active ? <MdFullscreenExit /> : <MdFullscreen />} />
+        <Button size="small" onClick={toggleReverce} type={reverceRenderBool.value ? "primary" : "dashed"} icon={<LiaExchangeAltSolid />} />
       </Space>
 
-      {activeCard && <Button className="play-button" onClick={handlePlay(activeCard?.front)} type="dashed" icon={<HiSpeakerWave />} />}
+      {activeCard && <Button className="play-button" onClick={handlePlay} type="dashed" icon={<HiSpeakerWave />} />}
     </>
   );
 
@@ -178,20 +185,18 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
           />
         ) : (
           <motion.div initial="hidden" animate="visible" variants={container}>
-            <motion.div variants={item}>
-              <motion.div className="card cursor-pointer mx-auto" key={activeCard ? activeCard.front : "empty"} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -10, opacity: 0 }} transition={{ duration: 0.2 }}>
-                <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
-                  <div className="card-front">
-                    {absoluteActions}
-                    <Typography.Title level={5}>{activeCard?.front}</Typography.Title>
-                  </div>
-
-                  <div className="card-back">
-                    {absoluteActions}
-                    <Typography.Title level={5}>{activeCard?.back}</Typography.Title>
-                  </div>
+            <motion.div className="card cursor-pointer mx-auto" variants={item} key={activeCard ? activeCard.front : "empty"}>
+              <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
+                <div className="card-front">
+                  {absoluteActions}
+                  <Typography.Title level={5}>{reverceRenderBool.value ? activeCard?.back : activeCard?.front}</Typography.Title>
                 </div>
-              </motion.div>
+
+                <div className="card-back">
+                  {absoluteActions}
+                  <Typography.Title level={5}>{reverceRenderBool.value ? activeCard?.front : activeCard?.back}</Typography.Title>
+                </div>
+              </div>
             </motion.div>
 
             <Flex gap="15px" className="actions" wrap>

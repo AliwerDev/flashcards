@@ -45,12 +45,15 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
       title: t("Role"),
       dataIndex: "role",
       key: "role",
+      width: 150,
       render: (value: string) => value || "user",
     },
     {
       title: t("Cards count"),
       dataIndex: "cardCount",
       key: "cardCount",
+      width: 150,
+      sorter: (a, b) => a.cardCount - b.cardCount,
     },
     {
       title: t("Actions"),

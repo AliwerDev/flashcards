@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 export const Styled = styled.div`
   .content {
-    min-height: 90vh;
+    min-height: 85vh;
     display: grid;
     grid-template-rows: auto max-content;
   }

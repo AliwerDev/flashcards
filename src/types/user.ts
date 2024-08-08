@@ -5,5 +5,5 @@ export interface IUser {
   email: string;
   picture: string;
   role: string;
-  cardsCount?: number;
+  cardCount: number;
 }
