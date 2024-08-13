@@ -68,7 +68,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
   const { startConfetti, isPlaying } = useConfetti();
 
   const { data: active_cards_data, isLoading } = useQuery({ queryKey: ["active-cards", categoryId], queryFn: () => axiosInstance.get(endpoints.card.getActive(categoryId)) });
-  const { data: boxes_data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list(categoryId)) });
+  const { data: boxes_data } = useQuery({ queryKey: ["boxes", categoryId], queryFn: () => axiosInstance.get(endpoints.box.list(categoryId)) });
   const active_cards: ICard[] = active_cards_data?.data || [];
   const boxesObject = makeBoxesObject(boxes_data?.data);
 

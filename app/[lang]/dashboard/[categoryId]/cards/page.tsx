@@ -26,7 +26,7 @@ const CardsPage = ({ params: { lang, categoryId } }: IProps) => {
     token: { colorBgContainer, borderRadius },
   } = theme.useToken();
 
-  const { data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list(categoryId)) });
+  const { data } = useQuery({ queryKey: ["boxes", categoryId], queryFn: () => axiosInstance.get(endpoints.box.list(categoryId)) });
   const boxes: IBox[] = data?.data || [];
 
   const { data: cardData, isLoading: isLoadingCards } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
