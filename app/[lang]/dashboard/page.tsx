@@ -1,35 +1,22 @@
 "use client";
-import LineChart from "@/app/components/analitics/LineChart";
-import ReviewsPieChart from "@/app/components/analitics/ReviewsPieChart";
-import { useTranslation } from "@/app/i18/client";
-import { ICard } from "@/src/types/card";
-import { IReview } from "@/src/types/other";
+import { paths } from "@/src/routes/paths";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
+import get from "lodash.get";
+import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 
-import { Col, Row } from "antd";
-import React from "react";
+const Page = ({ params: { lang } }: { params: { lang: string } }) => {
+  const router = useRouter();
+  const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: () => axiosInstance.get(endpoints.category.list) });
 
-const AnaliticsPage = ({ params: { lang } }: { params: { lang: string } }) => {
-  const { t } = useTranslation(lang);
-  const { data } = useQuery({ queryKey: ["reviews"], queryFn: () => axiosInstance.get(endpoints.card.reviews) });
-  const { data: cardsList } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
+  useEffect(() => {
+    if (get(categories, "data.length") > 0) {
+      router.push(paths.dashboard.main(lang, get(categories, "data[0]._id")));
+    }
+  }, [categories]);
 
-  const reviews: IReview[] = data?.data || [];
-  const cards: ICard[] = cardsList?.data || [];
-
-  return (
-    <div>
-      <Row gutter={[15, 15]}>
-        <Col xs={24} lg={16}>
-          <LineChart title={t("Analitics")} t={t} data={reviews} cards={cards} />
-        </Col>
-        <Col xs={24} lg={8}>
-          <ReviewsPieChart title={t("All reviews")} t={t} reviews={reviews} />
-        </Col>
-      </Row>
-    </div>
-  );
+  return <div></div>;
 };
 
-export default AnaliticsPage;
+export default Page;

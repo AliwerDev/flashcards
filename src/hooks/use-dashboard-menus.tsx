@@ -24,7 +24,7 @@ export const useDashboardMenus = () => {
     () => [
       [
         {
-          key: "",
+          key: "analytics",
           icon: <TbDeviceDesktopAnalytics />,
           label: t("Analitics"),
         },

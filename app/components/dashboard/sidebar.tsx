@@ -22,7 +22,6 @@ const SidebarContent = ({ lang, t }: IProps) => {
   const pathname = usePathname();
 
   const creatingBool = useBoolean();
-
   const defaultSelectedKeys = makeKeysArrayFromPathname(pathname);
 
   const selectMenuItemHandler = useCallback(
