@@ -20,7 +20,7 @@ export default function RoleBasedGuard({ hasContent = true, roles, children }: R
 
   const currentRole = user?.role;
 
-  if (typeof roles !== "undefined" && !roles.includes(currentRole)) {
+  if (typeof roles !== "undefined" && currentRole && !roles.includes(currentRole)) {
     return hasContent ? (
       <div>
         <m.div variants={varBounce().in}>
