@@ -4,48 +4,65 @@ import { useTranslation } from "react-i18next";
 import { LuPlay } from "react-icons/lu";
 import { TbDeviceDesktopAnalytics, TbHome2, TbList, TbUsers } from "react-icons/tb";
 import { useAuthContext } from "../auth/hooks";
+import { MenuProps } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance, { endpoints } from "../utils/axios";
 import get from "lodash.get";
+import ICategory from "../types/category";
 
-export type Menus = ({ key: string; icon: React.ReactNode; label: string; path?: undefined; children?: any } | { key: string; icon: React.ReactNode; label: string; path: string; children?: any })[];
+type MenuItem = Required<MenuProps>["items"][number];
+
+export type Menus = MenuItem[];
 
 export const useDashboardMenus = () => {
   const { user } = useAuthContext();
   const { t } = useTranslation();
 
-  const menuItems: Menus = useMemo(
-    () => [
-      {
-        key: "",
-        icon: <TbHome2 />,
-        label: t("Main page"),
-      },
-      {
-        key: "play",
-        icon: <LuPlay />,
-        label: t("Start Learning"),
-      },
-      {
-        key: "analitics",
-        icon: <TbDeviceDesktopAnalytics />,
-        label: t("Analitics"),
-      },
-      {
-        key: "cards",
-        icon: <TbList />,
-        label: t("Cards list"),
-      },
+  const { data: categories, isLoading } = useQuery({ queryKey: ["categories"], queryFn: () => axiosInstance.get(endpoints.category.list) });
 
-      ...(get(user, "role") === "admin"
-        ? [
-            {
-              key: "users",
-              icon: <TbUsers />,
-              label: t("Users"),
-            },
-          ]
-        : []),
+  const menuItems: Menus[] = useMemo(
+    () => [
+      [
+        {
+          key: "",
+          icon: <TbDeviceDesktopAnalytics />,
+          label: t("Analitics"),
+        },
+        ...(user && user.role === "admin"
+          ? [
+              {
+                key: "users",
+                icon: <TbUsers />,
+                label: t("Users"),
+              },
+            ]
+          : []),
+      ],
+      !isLoading
+        ? get(categories, "data", []).map((category: ICategory) => ({
+            key: category._id,
+            label: category.title,
+            children: [
+              {
+                key: `${category._id}/main`,
+                icon: <TbHome2 />,
+                label: t("Main"),
+              },
+              {
+                key: `${category._id}/play`,
+                icon: <LuPlay />,
+                label: t("Start Learning"),
+              },
+              {
+                key: `${category._id}/cards`,
+                icon: <TbList />,
+                label: t("Cards"),
+              },
+            ],
+          }))
+        : [],
     ],
-    [t, user]
+    [t, user, categories]
   );
 
   return menuItems;

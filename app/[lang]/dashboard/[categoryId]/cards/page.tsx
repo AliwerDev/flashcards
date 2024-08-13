@@ -14,7 +14,11 @@ import React, { useMemo } from "react";
 import { LuPencil, LuSearch } from "react-icons/lu";
 import styled from "@emotion/styled";
 
-const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
+interface IProps {
+  params: { lang: string; categoryId: string };
+}
+
+const CardsPage = ({ params: { lang, categoryId } }: IProps) => {
   const { t } = useTranslation(lang);
   const editCardBool = useBoolean();
   const filter = useFilter({ search: "", boxId: "ALL", status: "ALL" });
@@ -22,7 +26,7 @@ const CardsPage = ({ params: { lang } }: { params: { lang: string } }) => {
     token: { colorBgContainer, borderRadius },
   } = theme.useToken();
 
-  const { data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list) });
+  const { data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list(categoryId)) });
   const boxes: IBox[] = data?.data || [];
 
   const { data: cardData, isLoading: isLoadingCards } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });

@@ -10,9 +10,10 @@ const { Option } = Select;
 type Props = {
   open: BooleanReturnType;
   t: TFunction;
+  categoryId: string;
 };
 
-const AddBoxModal = ({ open, t }: Props) => {
+const AddBoxModal = ({ open, t, categoryId }: Props) => {
   const queryClient = useQueryClientInstance();
   const [form] = Form.useForm();
 
@@ -20,7 +21,7 @@ const AddBoxModal = ({ open, t }: Props) => {
     mutationKey: ["add-box"],
     mutationFn: (data: any) => axiosInstance.post(endpoints.box.create, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boxes-with-count"] });
+      queryClient.invalidateQueries({ queryKey: ["boxes-with-count", categoryId] });
       message.success(t("successfully_created"));
       open.onFalse();
       form.resetFields();
@@ -30,19 +31,19 @@ const AddBoxModal = ({ open, t }: Props) => {
 
   const onFinish = useCallback(
     ({ reviewInterval, type }: { reviewInterval: number; type: string }) => {
-      createBox({ reviewInterval: Number(reviewInterval) * Number(type || 1) });
+      createBox({ reviewInterval: Number(reviewInterval) * Number(type || 1), categoryId });
     },
     [createBox]
   );
 
   const cancel = () => {
-    form.setFieldsValue({ reviewInterval: "", type: "1" });
+    form.setFieldsValue({ reviewInterval: "", type: "60" });
     open.onFalse();
   };
 
   return (
     <Modal open={open.value} onClose={cancel} onCancel={cancel} title={t("Create new box")} footer={null}>
-      <Form initialValues={{ type: "1" }} form={form} name="add-box" onFinish={onFinish} layout="vertical">
+      <Form initialValues={{ type: "60" }} form={form} name="add-box" onFinish={onFinish} layout="vertical">
         <Flex className="my-8 w-full gap-2">
           <Form.Item
             name="reviewInterval"
@@ -59,11 +60,11 @@ const AddBoxModal = ({ open, t }: Props) => {
           </Form.Item>
           <Form.Item name="type" label={t("Unit")}>
             <Select size="large" style={{ width: 100 }}>
-              <Option value="1">{t("min")}</Option>
-              <Option value="60">{t("hour")}</Option>
-              <Option value="1440">{t("day")}</Option>
-              <Option value="10080">{t("week")}</Option>
-              <Option value="43200">{t("month")}</Option>
+              <Option value="60">{t("min")}</Option>
+              <Option value="3600">{t("hour")}</Option>
+              <Option value="86400">{t("day")}</Option>
+              <Option value="604800">{t("week")}</Option>
+              <Option value="2592000">{t("month")}</Option>
             </Select>
           </Form.Item>
         </Flex>

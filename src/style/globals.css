@@ -45,3 +45,10 @@ input:-webkit-autofill {
   border-radius: 5px;
   cursor: pointer;
 }
+
+.ant-menu-submenu-selected .ant-menu-submenu-title {
+  background: #53c61b;
+  &:hover {
+    background: #53c61b !important;
+  }
+}

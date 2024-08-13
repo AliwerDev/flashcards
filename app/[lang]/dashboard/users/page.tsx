@@ -5,11 +5,11 @@ import { useFilter } from "@/src/hooks/use-filter";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Dropdown, Flex, Input, Space, Table, theme, Typography } from "antd";
+import { TableProps } from "antd/lib";
 import debounce from "lodash.debounce";
 import React, { useMemo } from "react";
 import { LuSearch } from "react-icons/lu";
 import styled from "@emotion/styled";
-import { TableProps } from "antd/lib";
 import { IUser } from "@/src/types/user";
 import { TbDots, TbPencil, TbTrash } from "react-icons/tb";
 
@@ -26,7 +26,7 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
     {
       title: t("N"),
       dataIndex: "count",
-      key: "count",
+      key: "_id",
       width: 50,
       render: (_: any, _1: any, index: number) => index + 1,
     },
@@ -58,7 +58,7 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
     {
       title: t("Actions"),
       dataIndex: "actions",
-      key: "actions",
+      key: "_id",
       width: 50,
       render: () => (
         <Dropdown

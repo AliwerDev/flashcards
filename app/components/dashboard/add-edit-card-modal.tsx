@@ -16,9 +16,10 @@ type Props = {
   boxes?: IBox[];
   t: TFunction;
   inPlayPage?: boolean;
+  categoryId: string;
 };
 
-const AddEditCardModal = ({ openBool, t, boxes, inPlayPage = false }: Props) => {
+const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }: Props) => {
   const queryClient = useQueryClientInstance();
   const [form] = Form.useForm();
   const [modal, contextHolder] = Modal.useModal();
@@ -29,12 +30,12 @@ const AddEditCardModal = ({ openBool, t, boxes, inPlayPage = false }: Props) => 
     mutationFn: (data: ICard) => (openBool.data ? axiosInstance.patch(endpoints.card.edit(openBool.data._id), data) : isJsonUploadBool.value ? axiosInstance.post(endpoints.card.createList, data) : axiosInstance.post(endpoints.card.create, data)),
     onSuccess: () => {
       if (inPlayPage) {
-        queryClient.invalidateQueries({ queryKey: ["active-cards"] });
+        queryClient.invalidateQueries({ queryKey: ["active-cards", categoryId] });
       } else if (!openBool.data) {
-        queryClient.invalidateQueries({ queryKey: ["boxes-with-count"] });
-        queryClient.invalidateQueries({ queryKey: ["active-cards"] });
+        queryClient.invalidateQueries({ queryKey: ["boxes-with-count", categoryId] });
+        queryClient.invalidateQueries({ queryKey: ["active-cards", categoryId] });
       } else {
-        queryClient.invalidateQueries({ queryKey: ["cards"] });
+        queryClient.invalidateQueries({ queryKey: ["cards", categoryId] });
       }
 
       message.success(openBool.data ? t("successfully_changed") : t("successfully_created"));

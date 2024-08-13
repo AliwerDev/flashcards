@@ -1,3 +1,5 @@
+import ICategory from "./category";
+
 export interface IUser {
   _id: string;
   firstName: string;
@@ -6,4 +8,5 @@ export interface IUser {
   picture: string;
   role: string;
   cardCount: number;
+  categories: ICategory[];
 }

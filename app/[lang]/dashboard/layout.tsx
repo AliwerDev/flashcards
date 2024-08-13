@@ -1,19 +1,22 @@
 "use client";
 import React, { ReactNode } from "react";
-import { MoonOutlined, SunOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Drawer, Flex, Layout, Menu, Space, theme } from "antd";
+import { HomeOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Drawer, Flex, Layout, theme } from "antd";
 import { useSettingsContext } from "@/src/settings/hooks";
-import { useDashboardMenus } from "@/src/hooks/use-dashboard-menus";
 import { LanguageElements } from "@/app/components/dashboard/language";
 import { AuthGuard } from "@/src/auth/guard";
 import { useTranslation } from "@/app/i18/client";
 import ProfileItem from "@/app/components/dashboard/profile-item";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+
+import { usePathname } from "next/navigation";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import SimpleBar from "simplebar-react";
+import SidebarContent from "@/app/components/dashboard/sidebar";
+import { TFunction } from "i18next";
+import ICategory from "@/src/types/category";
+import axiosInstance, { endpoints } from "@/src/utils/axios";
+import { useQuery } from "@tanstack/react-query";
 import get from "lodash.get";
-
 const { Header, Sider, Content } = Layout;
 
 interface ILayout {
@@ -25,42 +28,20 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
   const { sidebar_collapsed, theme: apptheme, changeMode, updateData } = useSettingsContext();
   const pathname = usePathname();
   const { t } = useTranslation(lang);
-  const menus = useDashboardMenus();
-  const router = useRouter();
 
-  const breadcrumbItems = generateBreadcrumbs(pathname);
+  const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: () => axiosInstance.get(endpoints.category.list) });
+
+  const breadcrumbItems = generateBreadcrumbs(pathname, t, get(categories, "data") || []);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const selectedMenuKey: string = get(
-    menus.find((menu) => menu.key && pathname.endsWith(menu.key)),
-    "key",
-    ""
-  );
-
-  const logo = (
-    <div className="w-full flex justify-start px-2 my-3 cursor-pointer">
-      <Image className="max-h-10 min-h-10" src="/assets/logo/flashcards1.svg" alt="flashcards" height={40} width={180} />
-    </div>
-  );
-
   return (
     <AuthGuard lang={lang}>
       <Layout className="h-screen">
         <Drawer placement="left" onClose={() => updateData({ sidebar_collapsed: true })} open={!sidebar_collapsed} closable={false} rootClassName="block md:hidden" styles={{ body: { padding: "10px 0", background: colorBgContainer }, header: { paddingBlock: 10 } }} width={200}>
-          {logo}
-          <Menu
-            style={{
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-            theme={apptheme}
-            onSelect={(menu: any) => router.push(`/${lang}/dashboard/${menu.key}`)}
-            defaultSelectedKeys={[selectedMenuKey]}
-            items={menus}
-          />
+          <SidebarContent closeSidebar={() => ""} {...{ apptheme, borderRadiusLG, colorBgContainer, lang, t }} />
         </Drawer>
 
         <Sider
@@ -74,21 +55,7 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
           trigger={null}
           zeroWidthTriggerStyle={{ background: colorBgContainer }}
         >
-          {logo}
-          <Menu
-            style={{
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-            theme={apptheme}
-            mode="inline"
-            items={menus}
-            defaultSelectedKeys={[selectedMenuKey]}
-            onSelect={(menu: any) => {
-              console.log(menu);
-              router.push(`/${lang}/dashboard/${menu.key}`);
-            }}
-          />
+          <SidebarContent closeSidebar={() => ""} {...{ lang, t }} />
         </Sider>
         <Layout>
           <Header className="px-3 flex justify-between items-center" style={{ background: colorBgContainer }}>
@@ -112,16 +79,23 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
   );
 };
 
-const generateBreadcrumbs = (pathname: string) => {
-  const pathSegments = pathname
-    .split("/")
-    .filter((segment: string) => segment)
-    .slice(1);
+const generateBreadcrumbs = (pathname: string, t: TFunction, categories: ICategory[]) => {
+  const items: any = [{ title: <HomeOutlined />, href: "/" }];
 
-  return pathSegments.map((segment, index) => {
-    const href = "/" + pathSegments.slice(0, index + 1).join("/");
-    return { title: segment.charAt(0).toUpperCase() + segment.slice(1), href };
-  });
+  if (pathname.includes("users")) {
+    items.push({ title: <>{t("Users")}</> });
+  } else if (pathname.includes("dashboard/")) {
+    const categoryId = pathname.split("/")[3];
+    const category = categories.find((c) => c._id === categoryId);
+
+    if (category) {
+      items.push({ title: <>{category.title}</> });
+    }
+  } else if (pathname.endsWith("/dashboard")) {
+    items.push({ title: <>{t("Analytics")}</> });
+  }
+
+  return items;
 };
 
 export default App;

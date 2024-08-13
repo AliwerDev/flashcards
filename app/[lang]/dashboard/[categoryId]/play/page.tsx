@@ -22,6 +22,9 @@ import useChangeableSpeech from "@/src/hooks/use-speach";
 import { FlipCardStyled } from "./styled";
 import FireFlies from "@/app/components/animations/firefly";
 import { LiaExchangeAltSolid } from "react-icons/lia";
+import Confetti from "react-confetti";
+import useConfetti from "@/src/hooks/use-confetti";
+import { paths } from "@/src/routes/paths";
 
 const container = {
   hidden: { opacity: 1, scale: 0 },
@@ -43,7 +46,11 @@ const item = {
   },
 };
 
-const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
+interface IProps {
+  params: { lang: string; categoryId: string };
+}
+
+const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
   const { t } = useTranslation(lang);
   const icBottonRef = useRef<HTMLButtonElement>(null);
   const cBottonRef = useRef<HTMLButtonElement>(null);
@@ -58,29 +65,38 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const reverceRenderBool = useBoolean();
   const loading = useBoolean();
   const editModalBool = useBoolean();
+  const { startConfetti, isPlaying } = useConfetti();
 
-  const { data: active_cards_data, isLoading } = useQuery({ queryKey: ["active-cards"], queryFn: () => axiosInstance.get(endpoints.card.getActive) });
-  const { data: boxes_data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list) });
+  const { data: active_cards_data, isLoading } = useQuery({ queryKey: ["active-cards", categoryId], queryFn: () => axiosInstance.get(endpoints.card.getActive(categoryId)) });
+  const { data: boxes_data } = useQuery({ queryKey: ["boxes"], queryFn: () => axiosInstance.get(endpoints.box.list(categoryId)) });
   const active_cards: ICard[] = active_cards_data?.data || [];
   const boxesObject = makeBoxesObject(boxes_data?.data);
 
   const { mutate: playCard, isPending } = useMutation({
     mutationKey: ["add-box"],
-    mutationFn: (correct: boolean) => axiosInstance.post(endpoints.card.play, { cardId: activeCard?._id, correct }),
-    onSuccess: (_, variables) => {
-      queryClient.setQueryData(["active-cards"], (oldData: any) => {
-        const changed_active_cards = [...oldData.data];
+    mutationFn: (correct: boolean) => axiosInstance.post(endpoints.card.play(categoryId), { cardId: activeCard?._id, correct }),
+    onSuccess: (_, isCorrect) => {
+      queryClient.setQueryData(["active-cards", categoryId], (oldData: any) => {
+        let changed_active_cards = [...oldData.data];
 
-        if (variables) {
-          changed_active_cards.splice(0, 1);
+        if (isCorrect) {
+          changed_active_cards.shift();
         } else {
-          const playedCard = changed_active_cards.splice(0, 1);
-          changed_active_cards.push(playedCard[0]);
+          const playedCard = changed_active_cards.shift();
+          changed_active_cards.push(playedCard);
         }
-        setActiveCard(changed_active_cards[0]);
-        speacher.setText(removeParentheses(changed_active_cards[0]?.front));
+
+        if (changed_active_cards.length) {
+          const newActiveCard = changed_active_cards[0];
+          setActiveCard(newActiveCard);
+          speacher.setText(removeParentheses(newActiveCard?.front));
+        } else {
+          startConfetti();
+        }
+
         showBool.onFalse();
         loading.onFalse();
+
         return { ...oldData, data: changed_active_cards };
       });
     },
@@ -165,83 +181,87 @@ const PlayPage = ({ params: { lang } }: { params: { lang: string } }) => {
   );
 
   return (
-    <FullScreen handle={fullScreenHandle}>
-      <FlipCardStyled style={{ background: clientTheme === "dark" ? token.colorBgBase : "#e9ece5" }}>
-        {isLoading ? (
-          <div className="h-[300px] grid place-items-center">
-            <Spin />
-          </div>
-        ) : active_cards.length <= 0 ? (
-          <Empty
-            description={
-              <div>
-                <Typography.Text type="secondary">{t("You have completed all active cards!")}</Typography.Text>
-                <Button href="/dashboard" icon={<LuMoveLeft />} type="link">
-                  {t("Back to home!")}
-                </Button>
-              </div>
-            }
-            rootClassName="mt-10"
-          />
-        ) : (
-          <motion.div initial="hidden" animate="visible" variants={container}>
-            <motion.div className="card cursor-pointer mx-auto" variants={item} key={activeCard ? activeCard.front : "empty"}>
-              <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
-                <div className="card-front">
-                  {absoluteActions}
-                  <Typography.Title level={5}>{reverceRenderBool.value ? activeCard?.back : activeCard?.front}</Typography.Title>
+    <>
+      <FullScreen handle={fullScreenHandle}>
+        <FlipCardStyled style={{ background: clientTheme === "dark" ? token.colorBgBase : "#e9ece5" }}>
+          {isLoading ? (
+            <div className="h-[300px] grid place-items-center">
+              <Spin />
+            </div>
+          ) : active_cards.length <= 0 ? (
+            <Empty
+              description={
+                <div className="flex flex-col items-center">
+                  <Typography.Text type="secondary">{t("You have completed all active cards!")}</Typography.Text>
+                  <Button href={paths.dashboard.main(lang, categoryId)} icon={<LuMoveLeft />} type="link">
+                    {t("Back to home!")}
+                  </Button>
                 </div>
+              }
+              image="/assets/vectors/finished.png"
+              imageStyle={{ height: "300px", display: "flex", justifyContent: "center" }}
+              rootClassName="mt-2"
+            />
+          ) : (
+            <motion.div initial="hidden" animate="visible" variants={container}>
+              <motion.div className="card cursor-pointer mx-auto" variants={item} key={activeCard ? activeCard.front : "empty"}>
+                <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
+                  <div className="card-front">
+                    {absoluteActions}
+                    <Typography.Title level={5}>{reverceRenderBool.value ? activeCard?.back : activeCard?.front}</Typography.Title>
+                  </div>
 
-                <div className="card-back">
-                  {absoluteActions}
-                  <Typography.Title level={5}>{reverceRenderBool.value ? activeCard?.front : activeCard?.back}</Typography.Title>
+                  <div className="card-back">
+                    {absoluteActions}
+                    <Typography.Title level={5}>{reverceRenderBool.value ? activeCard?.front : activeCard?.back}</Typography.Title>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
+
+              <Flex gap="15px" className="actions" wrap>
+                <motion.div className="flex-1" variants={item}>
+                  <Button
+                    ref={icBottonRef}
+                    onClick={() => {
+                      if (isPending) return;
+                      loading.onTrue("incorrect");
+                      playCard(false);
+                    }}
+                    danger
+                    size="large"
+                    type="dashed"
+                    loading={loading.data === "incorrect"}
+                    icon={<GoThumbsdown />}
+                  />
+                </motion.div>
+                <motion.div className="flex-1" variants={item}>
+                  <Button
+                    ref={cBottonRef}
+                    onClick={() => {
+                      if (isPending) return;
+                      loading.onTrue("correct");
+                      playCard(true);
+                    }}
+                    loading={loading.data === "correct"}
+                    size="large"
+                    type="dashed"
+                    icon={<GoThumbsup />}
+                  />
+                </motion.div>
+                <motion.div variants={item} className="w-full text-center">
+                  <Typography.Text type="secondary" className="desctop-element text-xs">
+                    {t("Or just press ⬅ / ➡️ keys!")}
+                  </Typography.Text>
+                </motion.div>
+              </Flex>
             </motion.div>
-
-            <Flex gap="15px" className="actions" wrap>
-              <motion.div className="flex-1" variants={item}>
-                <Button
-                  ref={icBottonRef}
-                  onClick={() => {
-                    if (isPending) return;
-                    loading.onTrue("incorrect");
-                    playCard(false);
-                  }}
-                  danger
-                  size="large"
-                  type="dashed"
-                  loading={loading.data === "incorrect"}
-                  icon={<GoThumbsdown />}
-                />
-              </motion.div>
-              <motion.div className="flex-1" variants={item}>
-                <Button
-                  ref={cBottonRef}
-                  onClick={() => {
-                    if (isPending) return;
-                    loading.onTrue("correct");
-                    playCard(true);
-                  }}
-                  loading={loading.data === "correct"}
-                  size="large"
-                  type="dashed"
-                  icon={<GoThumbsup />}
-                />
-              </motion.div>
-              <motion.div variants={item} className="w-full text-center">
-                <Typography.Text type="secondary" className="desctop-element text-xs">
-                  {t("Or just press ⬅ / ➡️ keys!")}
-                </Typography.Text>
-              </motion.div>
-            </Flex>
-          </motion.div>
-        )}
-        <AddEditCardModal openBool={editModalBool} t={t} inPlayPage />
-
-        <FireFlies />
-      </FlipCardStyled>
-    </FullScreen>
+          )}
+          <AddEditCardModal categoryId={categoryId} openBool={editModalBool} t={t} inPlayPage />
+          <FireFlies />
+        </FlipCardStyled>
+      </FullScreen>
+      {isPlaying && <Confetti />}
+    </>
   );
 };
 

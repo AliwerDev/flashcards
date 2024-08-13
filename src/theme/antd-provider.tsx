@@ -11,6 +11,25 @@ type Props = {
   lang: string;
 };
 
+const colors = {
+  dark: {
+    colorSuccess: "#53c61b",
+    colorPrimary: "#52c41a",
+    colorInfo: "#13c2c2",
+    colorBgBase: "#000000",
+    borderRadius: 4,
+    wireframe: false,
+  },
+  light: {
+    colorSuccess: "#53c61b",
+    colorPrimary: "#52c41a",
+    colorInfo: "#13c2c2",
+    colorBgBase: "#f3f5f1",
+    borderRadius: 4,
+    wireframe: false,
+  },
+};
+
 const AntdProvider = ({ children, lang }: Props) => {
   const { theme: apptheme } = useSettingsContext();
   const isDarkMode = apptheme === "dark";
@@ -20,30 +39,14 @@ const AntdProvider = ({ children, lang }: Props) => {
       // @ts-ignore
       locale={lang === "en" ? en_US : ru_RU}
       theme={{
-        token: isDarkMode
-          ? {
-              colorSuccess: "#53c61b",
-              colorPrimary: "#52c41a",
-              colorInfo: "#13c2c2",
-              colorBgBase: "#000000",
-              borderRadius: 4,
-              wireframe: false,
-            }
-          : {
-              colorSuccess: "#53c61b",
-              colorPrimary: "#52c41a",
-              colorInfo: "#13c2c2",
-              colorBgBase: "#f3f5f1",
-              borderRadius: 4,
-              wireframe: false,
-            },
+        token: isDarkMode ? colors.dark : colors.light,
         algorithm: isDarkMode ? [theme.darkAlgorithm] : [theme.defaultAlgorithm],
 
         components: {
           Menu: {
-            colorInfoActive: "#ffffff",
-            itemActiveBg: "#52c41a",
-            colorBgTextActive: "#52c41a",
+            darkItemBg: isDarkMode ? colors.dark.colorBgBase : colors.light.colorBgBase,
+            itemSelectedBg: isDarkMode ? colors.dark.colorPrimary : colors.light.colorPrimary,
+            itemSelectedColor: "#fff",
           },
         },
       }}

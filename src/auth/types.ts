@@ -1,4 +1,6 @@
-export type AuthUserType = null | Record<string, any>;
+import { IUser } from "../types/user";
+
+export type AuthUserType = null | IUser;
 
 export type ActionMapType<M extends { [index: string]: any }> = {
   [Key in keyof M]: M[Key] extends undefined

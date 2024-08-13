@@ -117,15 +117,6 @@ export function AuthProvider({ children }: Props) {
     const { token } = get(res, "data", {});
     setStorage(token);
     initialize();
-
-    dispatch({
-      type: Types.LOGIN,
-      payload: {
-        user: {
-          accessToken: token,
-        },
-      },
-    });
   }, []);
 
   // LOGIN
@@ -135,15 +126,6 @@ export function AuthProvider({ children }: Props) {
     const { token } = get(res, "data", {});
     setStorage(token);
     initialize();
-
-    dispatch({
-      type: Types.LOGIN,
-      payload: {
-        user: {
-          accessToken: token,
-        },
-      },
-    });
   }, []);
 
   // REGISTER
@@ -155,12 +137,7 @@ export function AuthProvider({ children }: Props) {
 
     dispatch({
       type: Types.REGISTER,
-      payload: {
-        user: {
-          ...user,
-          accessToken: token,
-        },
-      },
+      payload: user,
     });
   }, []);
 
