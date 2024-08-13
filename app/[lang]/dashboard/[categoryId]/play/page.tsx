@@ -257,7 +257,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
             </motion.div>
           )}
           <AddEditCardModal categoryId={categoryId} openBool={editModalBool} t={t} inPlayPage />
-          {fullScreenHandle.active ? <FireFlies /> : null}
+          {!fullScreenHandle.active ? <FireFlies /> : null}
         </FlipCardStyled>
       </FullScreen>
       {isPlaying && <Confetti />}
