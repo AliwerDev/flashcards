@@ -29,7 +29,7 @@ const CardsPage = ({ params: { lang, categoryId } }: IProps) => {
   const { data } = useQuery({ queryKey: ["boxes", categoryId], queryFn: () => axiosInstance.get(endpoints.box.list(categoryId)) });
   const boxes: IBox[] = data?.data || [];
 
-  const { data: cardData, isLoading: isLoadingCards } = useQuery({ queryKey: ["cards", categoryId], queryFn: () => axiosInstance.get(endpoints.card.list(cardData)) });
+  const { data: cardData, isLoading: isLoadingCards } = useQuery({ queryKey: ["cards", categoryId], queryFn: () => axiosInstance.get(endpoints.card.list(categoryId)) });
 
   const filteredCards: ICard[] = useMemo(() => {
     return filterFunction(cardData?.data, filter.value as Ifilter);
