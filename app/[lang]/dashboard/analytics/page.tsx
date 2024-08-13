@@ -10,10 +10,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Col, Row } from "antd";
 import React from "react";
 
-const AnaliticsPage = ({ params: { lang } }: { params: { lang: string } }) => {
+interface IProps {
+  params: { lang: string; categoryId: string };
+}
+
+const AnaliticsPage = ({ params: { lang, categoryId } }: IProps) => {
   const { t } = useTranslation(lang);
   const { data } = useQuery({ queryKey: ["reviews"], queryFn: () => axiosInstance.get(endpoints.card.reviews) });
-  const { data: cardsList } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
+  const { data: cardsList } = useQuery({ queryKey: ["cards", categoryId], queryFn: () => axiosInstance.get(endpoints.card.list(categoryId)) });
 
   const reviews: IReview[] = data?.data || [];
   const cards: ICard[] = cardsList?.data || [];
