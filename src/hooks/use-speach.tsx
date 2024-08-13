@@ -10,7 +10,7 @@ function useChangeableSpeech() {
     start, // Function to start the speech or put it in queue
     pause, // Function to pause the speech
     stop, // Function to stop the speech or remove it from queue
-  } = useSpeech({ text, voiceURI: "Google US English" });
+  } = useSpeech({ text, voiceURI: "Google US English", rate: 0.8 });
 
   return {
     Text,

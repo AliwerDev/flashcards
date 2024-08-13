@@ -52,6 +52,7 @@ interface IProps {
 
 const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
   const { t } = useTranslation(lang);
+  const speachButtonRef = useRef<HTMLButtonElement>(null);
   const icBottonRef = useRef<HTMLButtonElement>(null);
   const cBottonRef = useRef<HTMLButtonElement>(null);
   const queryClient = useQueryClientInstance();
@@ -135,6 +136,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
+      if (editModalBool.value) return;
       if (e.key === "ArrowLeft" && icBottonRef.current) {
         e.preventDefault();
         icBottonRef.current.click();
@@ -144,6 +146,9 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
       } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
         e.preventDefault();
         showBool.onToggle();
+      } else if ((e.key === "/" || e.key === "v" || e.key === "s") && speachButtonRef.current) {
+        e.preventDefault();
+        speachButtonRef.current.click();
       }
     };
 
@@ -155,7 +160,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
         window.removeEventListener("keydown", keydown);
       }
     };
-  }, []);
+  }, [editModalBool.value]);
 
   const absoluteActions = (
     <>
@@ -176,7 +181,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
         <Button size="small" onClick={toggleReverce} type={reverceRenderBool.value ? "primary" : "dashed"} icon={<LiaExchangeAltSolid />} />
       </Space>
 
-      {activeCard && <Button className="play-button" onClick={handlePlay} type="dashed" icon={<HiSpeakerWave />} />}
+      {activeCard && <Button ref={speachButtonRef} className="play-button" onClick={handlePlay} type="dashed" icon={<HiSpeakerWave />} />}
     </>
   );
 
