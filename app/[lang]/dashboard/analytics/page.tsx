@@ -17,7 +17,7 @@ interface IProps {
 const AnaliticsPage = ({ params: { lang, categoryId } }: IProps) => {
   const { t } = useTranslation(lang);
   const { data } = useQuery({ queryKey: ["reviews"], queryFn: () => axiosInstance.get(endpoints.card.reviews) });
-  const { data: cardsList } = useQuery({ queryKey: ["cards", categoryId], queryFn: () => axiosInstance.get(endpoints.card.list(categoryId)) });
+  const { data: cardsList } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
 
   const reviews: IReview[] = data?.data || [];
   const cards: ICard[] = cardsList?.data || [];

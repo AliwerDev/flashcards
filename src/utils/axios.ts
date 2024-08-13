@@ -49,7 +49,7 @@ export const endpoints = {
     loginByGithub: "/auth/login-by-github",
   },
   card: {
-    list: (categoryId: string) => `/card?categoryId=${categoryId}`,
+    list: "/card",
     create: "/card",
     createList: "/card/list",
     reviews: "card/reviews",
