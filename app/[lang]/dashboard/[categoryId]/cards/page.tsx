@@ -78,7 +78,7 @@ const CardsPage = ({ params: { lang, categoryId } }: IProps) => {
         )}
       />
 
-      <AddEditCardModal {...{ boxes, t }} openBool={editCardBool} />
+      <AddEditCardModal categoryId={categoryId} {...{ boxes, t }} openBool={editCardBool} />
     </Styled>
   );
 };
