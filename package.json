@@ -5,10 +5,9 @@
   "scripts": {
     "dev": "NODE_ENV=development next dev",
     "build:dev": "NODE_ENV=development next build",
-    "build:prod": "NODE_ENV=production next build",
     "start:dev": "NODE_ENV=development next start",
     "start:prod": "NODE_ENV=production next start",
-    "lint": "next lint"
+    "build:prod": "NODE_ENV=production next build"
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
