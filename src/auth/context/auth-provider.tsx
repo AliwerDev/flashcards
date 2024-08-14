@@ -168,8 +168,9 @@ export function AuthProvider({ children }: Props) {
       register,
       logout,
       loginByGoogle,
+      reinitialize: initialize,
     }),
-    [login, logout, register, state.user, status, loginByGoogle]
+    [login, logout, register, state.user, status, loginByGoogle, initialize]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

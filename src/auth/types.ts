@@ -48,4 +48,5 @@ export type JWTContextType = {
   register: (data: RegisterDataType) => Promise<void>;
   logout: () => Promise<void>;
   loginByGoogle: (data: LoginByGoogleDataType) => Promise<void>;
+  reinitialize: () => void;
 };

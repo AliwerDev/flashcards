@@ -39,7 +39,7 @@ export const endpoints = {
     me: "/user/me",
     list: "/user/list",
     role: "/user/role",
-    editProfile: "/user/edit-profile",
+    update: "/user/update",
     changePassword: "/user/change-password",
   },
   auth: {
@@ -47,6 +47,7 @@ export const endpoints = {
     register: "/auth/register",
     loginByGoogle: "/auth/login-by-google",
     loginByGithub: "/auth/login-by-github",
+    token: "/auth/token",
   },
   card: {
     list: "/card",
