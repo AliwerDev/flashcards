@@ -4,7 +4,7 @@ import { ICard } from "@/src/types/card";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Empty, Flex, Space, Spin, theme, Typography } from "antd";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useBoolean } from "@/src/hooks/use-boolean";
 import { GoThumbsdown, GoThumbsup } from "react-icons/go";
 import { LuMoveLeft, LuPencil } from "react-icons/lu";
@@ -64,7 +64,6 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
   const [activeCard, setActiveCard] = useState<ICard>();
   const showBool = useBoolean();
   const reverceRenderBool = useBoolean();
-  const loading = useBoolean();
   const editModalBool = useBoolean();
   const { startConfetti, isPlaying } = useConfetti();
 
@@ -73,10 +72,12 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
   const active_cards: ICard[] = active_cards_data?.data || [];
   const boxesObject = makeBoxesObject(boxes_data?.data);
 
-  const { mutate: playCard, isPending } = useMutation({
-    mutationKey: ["add-box"],
-    mutationFn: (correct: boolean) => axiosInstance.post(endpoints.card.play(categoryId), { cardId: activeCard?._id, correct }),
-    onSuccess: (_, isCorrect) => {
+  const playCard = useCallback(
+    (isCorrect: boolean) => {
+      try {
+        axiosInstance.post(endpoints.card.play(categoryId), { cardId: activeCard?._id, correct: isCorrect });
+      } catch (error) {}
+
       queryClient.setQueryData(["active-cards", categoryId], (oldData: any) => {
         let changed_active_cards = [...oldData.data];
 
@@ -96,13 +97,12 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
         }
 
         showBool.onFalse();
-        loading.onFalse();
 
         return { ...oldData, data: changed_active_cards };
       });
     },
-    onError: () => "",
-  });
+    [activeCard, queryClient]
+  );
 
   const clickEditButton = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -125,7 +125,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
   };
 
   const { token } = theme.useToken();
-  const style = { background: token.colorBgContainer, borderRadius: token.borderRadius, border: "1 px solid", borderColor: token.colorBorder };
+  const style = { background: token.colorBgContainer, borderRadius: token.borderRadius, border: "1px solid", borderColor: token.colorBorder };
 
   useEffect(() => {
     if (active_cards.length > 0) {
@@ -167,8 +167,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
       <Space className="message" align="center">
         <MdOutlineAdsClick color={token.colorTextSecondary} />
         <Typography.Text className="text-xs" type="secondary">
-          {t("Click to show other side")}
-          <span className="desctop-element">{t(" or just press ⬆ / ⬇ keys")}</span>!
+          {t("click-to-show-other-side")}, <span className="desctop-element">{t("or-just-press-keys")}</span>
         </Typography.Text>
       </Space>
 
@@ -197,9 +196,9 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
             <Empty
               description={
                 <div className="flex flex-col items-center">
-                  <Typography.Text type="secondary">{t("You have completed all active cards!")}</Typography.Text>
+                  <Typography.Text type="secondary">{t("you-have-completed-all-active-cards")}</Typography.Text>
                   <Button href={paths.dashboard.main(lang, categoryId)} icon={<LuMoveLeft />} type="link">
-                    {t("Back to home!")}
+                    {t("back-to-home")}
                   </Button>
                 </div>
               }
@@ -209,7 +208,7 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
             />
           ) : (
             <motion.div initial="hidden" animate="visible" variants={container}>
-              <motion.div className="card cursor-pointer mx-auto" variants={item} key={activeCard ? activeCard.front : "empty"}>
+              <motion.div className="card cursor-pointer mx-auto" variants={item}>
                 <div onClick={showBool.onToggle} style={style} className={`card-content shadow-md ${showBool.value ? "show" : ""}`}>
                   <div className="card-front">
                     {absoluteActions}
@@ -225,37 +224,14 @@ const PlayPage = ({ params: { lang, categoryId } }: IProps) => {
 
               <Flex gap="15px" className="actions" wrap>
                 <motion.div className="flex-1" variants={item}>
-                  <Button
-                    ref={icBottonRef}
-                    onClick={() => {
-                      if (isPending) return;
-                      loading.onTrue("incorrect");
-                      playCard(false);
-                    }}
-                    danger
-                    size="large"
-                    type="dashed"
-                    loading={loading.data === "incorrect"}
-                    icon={<GoThumbsdown />}
-                  />
+                  <Button ref={icBottonRef} onClick={() => playCard(false)} danger size="large" type="dashed" icon={<GoThumbsdown />} />
                 </motion.div>
                 <motion.div className="flex-1" variants={item}>
-                  <Button
-                    ref={cBottonRef}
-                    onClick={() => {
-                      if (isPending) return;
-                      loading.onTrue("correct");
-                      playCard(true);
-                    }}
-                    loading={loading.data === "correct"}
-                    size="large"
-                    type="dashed"
-                    icon={<GoThumbsup />}
-                  />
+                  <Button ref={cBottonRef} onClick={() => playCard(true)} size="large" type="dashed" icon={<GoThumbsup />} />
                 </motion.div>
                 <motion.div variants={item} className="w-full text-center">
                   <Typography.Text type="secondary" className="desctop-element text-xs">
-                    {t("Or just press ⬅ / ➡️ keys!")}
+                    {t("or-just-press-keys-0")}
                   </Typography.Text>
                 </motion.div>
               </Flex>

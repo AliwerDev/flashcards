@@ -14,7 +14,7 @@ interface IProps {
   params: { lang: string; categoryId: string };
 }
 
-const AnaliticsPage = ({ params: { lang, categoryId } }: IProps) => {
+const AnaliticsPage = ({ params: { lang } }: IProps) => {
   const { t } = useTranslation(lang);
   const { data } = useQuery({ queryKey: ["reviews"], queryFn: () => axiosInstance.get(endpoints.card.reviews) });
   const { data: cardsList } = useQuery({ queryKey: ["cards"], queryFn: () => axiosInstance.get(endpoints.card.list) });
@@ -29,7 +29,7 @@ const AnaliticsPage = ({ params: { lang, categoryId } }: IProps) => {
           <LineChart title={t("Analitics")} t={t} data={reviews} cards={cards} />
         </Col>
         <Col xs={24} lg={8}>
-          <ReviewsPieChart title={t("All reviews")} t={t} reviews={reviews} />
+          <ReviewsPieChart title={t("all-reviews")} t={t} reviews={reviews} />
         </Col>
       </Row>
     </div>

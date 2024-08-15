@@ -46,17 +46,17 @@ export const useDashboardMenus = () => {
               {
                 key: `${category._id}/main`,
                 icon: <TbHome2 />,
-                label: t("Main"),
+                label: t("main"),
               },
               {
                 key: `${category._id}/play`,
                 icon: <LuPlay />,
-                label: t("Start Learning"),
+                label: t("start-learning"),
               },
               {
                 key: `${category._id}/cards`,
                 icon: <TbList />,
-                label: t("Cards"),
+                label: t("cards"),
               },
             ],
           }))

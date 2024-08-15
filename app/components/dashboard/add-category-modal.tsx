@@ -4,7 +4,7 @@ import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Flex, Form, Input, message, Modal } from "antd";
 import { TFunction } from "i18next";
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 
 type Props = {
   open: BooleanReturnType;
@@ -39,19 +39,19 @@ const AddEditCategoryModal = ({ open: openBool, t }: Props) => {
   }, [openBool]);
 
   return (
-    <Modal open={openBool.value} onClose={cancel} onCancel={cancel} title={t("Create new category")} footer={null}>
+    <Modal open={openBool.value} onClose={cancel} onCancel={cancel} title={t("create-new-category")} footer={null}>
       <Form initialValues={{ type: "1" }} form={form} name="add-box" onFinish={onFinish} layout="vertical">
         <Form.Item
           name="title"
-          label={t("Name")}
+          label={t("name")}
           rules={[
             {
               required: true,
-              message: t("Name is required!"),
+              message: t("name-is-required"),
             },
           ]}
         >
-          <Input min={1} className="w-full" size="large" placeholder={t("Name")} />
+          <Input min={1} className="w-full" size="large" placeholder={t("name")} />
         </Form.Item>
 
         <Flex justify="flex-end" gap="10px">

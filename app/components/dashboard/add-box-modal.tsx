@@ -48,17 +48,17 @@ const AddBoxModal = ({ open, t, categoryId }: Props) => {
           <Form.Item
             name="reviewInterval"
             className="flex-1"
-            label={t("Review interval")}
+            label={t("review-interval")}
             rules={[
               {
                 required: true,
-                message: "Review interval is required!",
+                message: t("review-interval-is-required"),
               },
             ]}
           >
-            <InputNumber min={1} className="w-full" size="large" placeholder={t("Review interval")} />
+            <InputNumber min={1} className="w-full" size="large" placeholder={t("review-interval")} />
           </Form.Item>
-          <Form.Item name="type" label={t("Unit")}>
+          <Form.Item name="type" label={t("unit")}>
             <Select size="large" style={{ width: 100 }}>
               <Option value="60">{t("min")}</Option>
               <Option value="3600">{t("hour")}</Option>

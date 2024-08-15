@@ -1,15 +1,13 @@
 "use client";
 import React, { ReactNode } from "react";
-import { HomeOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Drawer, Flex, Layout, theme } from "antd";
-import { useSettingsContext } from "@/src/settings/hooks";
 import { LanguageElements } from "@/app/components/dashboard/language";
 import { AuthGuard } from "@/src/auth/guard";
 import { useTranslation } from "@/app/i18/client";
 import ProfileItem from "@/app/components/dashboard/profile-item";
 
 import { usePathname } from "next/navigation";
-import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
+import { GoSidebarCollapse } from "react-icons/go";
 import SimpleBar from "simplebar-react";
 import SidebarContent from "@/app/components/dashboard/sidebar";
 import { TFunction } from "i18next";
@@ -17,6 +15,7 @@ import ICategory from "@/src/types/category";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
 import get from "lodash.get";
+import { useBoolean } from "@/src/hooks/use-boolean";
 const { Header, Sider, Content } = Layout;
 
 interface ILayout {
@@ -25,13 +24,12 @@ interface ILayout {
 }
 
 const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
-  const { sidebar_collapsed, theme: apptheme, changeMode, updateData } = useSettingsContext();
   const pathname = usePathname();
   const { t } = useTranslation(lang);
+  const sidebarBool = useBoolean();
 
   const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: () => axiosInstance.get(endpoints.category.list) });
-
-  const breadcrumbItems = generateBreadcrumbs(pathname, t, get(categories, "data") || []);
+  const breadcrumbItems = generateBreadcrumbs(pathname, t, lang, get(categories, "data") || []);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -40,8 +38,8 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
   return (
     <AuthGuard lang={lang}>
       <Layout className="h-screen">
-        <Drawer placement="left" onClose={() => updateData({ sidebar_collapsed: true })} open={!sidebar_collapsed} closable={false} rootClassName="block md:hidden" styles={{ body: { padding: "10px 0", background: colorBgContainer }, header: { paddingBlock: 10 } }} width={200}>
-          <SidebarContent closeSidebar={() => ""} {...{ apptheme, borderRadiusLG, colorBgContainer, lang, t }} />
+        <Drawer placement="left" onClose={sidebarBool.onFalse} open={sidebarBool.value} closable={false} rootClassName="block md:hidden" styles={{ body: { padding: "10px 0", background: colorBgContainer }, header: { paddingBlock: 10 } }} width="100vw">
+          <SidebarContent closable closeSidebar={() => sidebarBool.value && sidebarBool.onFalse()} {...{ borderRadiusLG, colorBgContainer, lang, t }} />
         </Drawer>
 
         <Sider
@@ -49,8 +47,8 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
           }}
-          theme={apptheme}
-          onCollapse={() => updateData({ sidebar_collapsed: !sidebar_collapsed })}
+          width={250}
+          onCollapse={sidebarBool.onToggle}
           className="hidden md:block"
           trigger={null}
           zeroWidthTriggerStyle={{ background: colorBgContainer }}
@@ -60,12 +58,11 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
         <Layout>
           <Header className="px-3 flex justify-between items-center" style={{ background: colorBgContainer }}>
             <Flex align="center" gap={5}>
-              <Button type="text" className="block md:hidden" onClick={() => updateData({ sidebar_collapsed: !sidebar_collapsed })} icon={sidebar_collapsed ? <GoSidebarCollapse className="text-lg" /> : <GoSidebarExpand className="text-lg" />} />
+              <Button type="text" className="flex md:hidden" onClick={sidebarBool.onToggle} icon={<GoSidebarCollapse className="text-lg" />} />
               <Breadcrumb items={breadcrumbItems} />
             </Flex>
             <Flex gap="15px" align="center">
               <LanguageElements lang={lang} />
-              <Button type="text" icon={apptheme == "dark" ? <SunOutlined /> : <MoonOutlined />} onClick={() => changeMode(apptheme == "dark" ? "light" : "dark")} />
               <ProfileItem lang={lang} t={t} />
             </Flex>
           </Header>
@@ -79,11 +76,15 @@ const App: React.FC<ILayout> = ({ children, params: { lang } }) => {
   );
 };
 
-const generateBreadcrumbs = (pathname: string, t: TFunction, categories: ICategory[]) => {
-  const items: any = [{ title: <HomeOutlined />, href: "/" }];
+const generateBreadcrumbs = (pathname: string, t: TFunction, lang: string, categories: ICategory[]) => {
+  const items: any = [];
 
   if (pathname.includes("users")) {
     items.push({ title: <>{t("Users")}</> });
+  } else if (pathname.includes("analytics")) {
+    items.push({ title: <>{t("Analytics")}</> });
+  } else if (pathname.includes("profile")) {
+    items.push({ title: <>{t("Profile")}</> });
   } else if (pathname.includes("dashboard/")) {
     const categoryId = pathname.split("/")[3];
     const category = categories.find((c) => c._id === categoryId);
@@ -91,8 +92,6 @@ const generateBreadcrumbs = (pathname: string, t: TFunction, categories: ICatego
     if (category) {
       items.push({ title: <>{category.title}</> });
     }
-  } else if (pathname.endsWith("/dashboard")) {
-    items.push({ title: <>{t("Analytics")}</> });
   }
 
   return items;

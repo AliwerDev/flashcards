@@ -8,5 +8,6 @@ export interface IUser {
   picture: string;
   role: string;
   cardCount: number;
+  reviewsCount: number;
   categories: ICategory[];
 }

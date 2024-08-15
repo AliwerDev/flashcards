@@ -1,23 +1,24 @@
 "use client";
 
+import { TableProps } from "antd/lib";
 import { useTranslation } from "@/app/i18/client";
 import { useFilter } from "@/src/hooks/use-filter";
 import axiosInstance, { endpoints } from "@/src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Dropdown, Flex, Input, Space, Table, theme, Typography } from "antd";
-import { TableProps } from "antd/lib";
+import { Avatar, Button, Dropdown, Flex, Input, Table, theme } from "antd";
 import debounce from "lodash.debounce";
 import React, { useMemo } from "react";
 import { LuSearch } from "react-icons/lu";
 import styled from "@emotion/styled";
 import { IUser } from "@/src/types/user";
 import { TbDots, TbPencil, TbTrash } from "react-icons/tb";
+import SimpleBar from "simplebar-react";
 
 const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { t } = useTranslation(lang);
   const filter = useFilter({ search: "", boxId: "ALL", status: "ALL" });
   const {
-    token: { colorBgContainer, borderRadius, colorWarning, colorError },
+    token: { colorBgContainer, borderRadius },
   } = theme.useToken();
 
   // TODO edit delete actions
@@ -31,10 +32,15 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
       render: (_: any, _1: any, index: number) => index + 1,
     },
     {
-      title: t("Full name"),
+      title: t("User"),
       dataIndex: "firstName",
       key: "firstName",
-      render: (value: string, row: IUser) => `${value || ""} ${row.lastName || ""}`,
+      render: (value: string, row: IUser) => (
+        <Flex align="center" gap="8px">
+          <Avatar size="small" src={row.picture} />
+          {value || ""} {row.lastName || ""}
+        </Flex>
+      ),
     },
     {
       title: t("Email"),
@@ -42,18 +48,25 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
       key: "email",
     },
     {
+      title: t("Reviews"),
+      dataIndex: "reviewsCount",
+      key: "reviewsCount",
+      width: 150,
+      sorter: (a, b) => a.reviewsCount - b.reviewsCount,
+    },
+    {
+      title: t("Cards"),
+      dataIndex: "cardCount",
+      key: "cardCount",
+      width: 150,
+      sorter: (a, b) => a.cardCount - b.cardCount,
+    },
+    {
       title: t("Role"),
       dataIndex: "role",
       key: "role",
       width: 150,
       render: (value: string) => value || "user",
-    },
-    {
-      title: t("Cards count"),
-      dataIndex: "cardCount",
-      key: "cardCount",
-      width: 150,
-      sorter: (a, b) => a.cardCount - b.cardCount,
     },
     {
       title: t("Actions"),
@@ -67,22 +80,15 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
               {
                 key: "1",
                 onClick: () => {},
-                label: (
-                  <Space>
-                    <TbPencil color={colorWarning} />
-                    <Typography.Text type="warning">{t("edit")}</Typography.Text>
-                  </Space>
-                ),
+                icon: <TbPencil />,
+                label: t("edit"),
               },
               {
                 key: "2",
+                icon: <TbTrash />,
+                label: t("delete"),
+                danger: true,
                 onClick: () => {},
-                label: (
-                  <Space>
-                    <TbTrash color={colorError} />
-                    <Typography.Text type="danger">{t("delete")}</Typography.Text>,{" "}
-                  </Space>
-                ),
               },
             ],
           }}
@@ -95,7 +101,7 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
     },
   ];
 
-  const { data: userData, isLoading: isLoadingUsers } = useQuery({ queryKey: ["users"], queryFn: () => axiosInstance.get(endpoints.user.list) });
+  const { data: userData } = useQuery({ queryKey: ["users"], queryFn: () => axiosInstance.get(endpoints.user.list) });
 
   const filteredUsers: IUser[] = useMemo(() => {
     return filterFunction(userData?.data, filter.value as Ifilter);
@@ -108,7 +114,9 @@ const UsersPage = ({ params: { lang } }: { params: { lang: string } }) => {
           <Input className="w-full md:max-w-64" onChange={debounce((e) => filter.changeFilter("search", e.target.value), 300)} prefix={<LuSearch />} placeholder={t("Search")} size="large" />
         </Flex>
       </div>
-      <Table columns={columns} dataSource={filteredUsers} pagination={false} />
+      <SimpleBar style={{ maxWidth: "100%" }}>
+        <Table columns={columns} dataSource={filteredUsers} pagination={false} />
+      </SimpleBar>
     </Styled>
   );
 };
@@ -118,6 +126,10 @@ const Styled = styled.div`
     margin-bottom: 10px;
     position: sticky;
     top: 0;
+  }
+
+  .ant-table {
+    min-width: max-content;
   }
 
   .ant-empty {

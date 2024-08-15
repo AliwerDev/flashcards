@@ -47,8 +47,8 @@ input:-webkit-autofill {
 }
 
 .ant-menu-submenu-selected .ant-menu-submenu-title {
-  background: #53c61b;
+  color: #53c61b !important;
   &:hover {
-    background: #53c61b !important;
+    color: #53c61b !important;
   }
 }

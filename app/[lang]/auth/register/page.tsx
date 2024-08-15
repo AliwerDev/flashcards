@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Form, Input, Button, theme } from "antd";
+import { Form, Input, Button } from "antd";
 import { LuUser, LuLock } from "react-icons/lu";
 import Link from "next/link";
 import { paths } from "@/src/routes/paths";
@@ -13,16 +13,12 @@ type Props = {
 export default function RegisterPage({ params: { lang } }: Props) {
   const { register } = useAuthContext();
 
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
   const onFinish = (values: any) => {
     register(values);
   };
 
   return (
-    <div style={{ background: colorBgContainer, borderRadius: borderRadiusLG }} className="w-full max-w-md p-8 shadow-md">
+    <>
       <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
       <Form name="login" className="login-form" onFinish={onFinish}>
         <Form.Item
@@ -34,7 +30,7 @@ export default function RegisterPage({ params: { lang } }: Props) {
             },
           ]}
         >
-          <Input prefix={<LuUser />} placeholder="Email" type="email" className="w-full p-2 border rounded" />
+          <Input size="large" prefix={<LuUser />} placeholder="Email" type="email" className="w-full p-2 border rounded" />
         </Form.Item>
 
         <Form.Item
@@ -46,11 +42,11 @@ export default function RegisterPage({ params: { lang } }: Props) {
             },
           ]}
         >
-          <Input placeholder="First name" className="w-full p-2 border rounded" />
+          <Input size="large" placeholder="First name" className="w-full p-2 border rounded" />
         </Form.Item>
 
         <Form.Item name="lastName">
-          <Input placeholder="Last name" className="w-full p-2 border rounded" />
+          <Input size="large" placeholder="Last name" className="w-full p-2 border rounded" />
         </Form.Item>
 
         <Form.Item
@@ -62,7 +58,7 @@ export default function RegisterPage({ params: { lang } }: Props) {
             },
           ]}
         >
-          <Input prefix={<LuLock />} type="password" placeholder="Password" className="w-full p-2 border rounded" />
+          <Input size="large" prefix={<LuLock />} type="password" placeholder="Password" className="w-full p-2 border rounded" />
         </Form.Item>
 
         <Form.Item
@@ -74,11 +70,11 @@ export default function RegisterPage({ params: { lang } }: Props) {
             },
           ]}
         >
-          <Input prefix={<LuLock />} type="password" placeholder="Confirm password" className="w-full p-2  border rounded" />
+          <Input size="large" prefix={<LuLock />} type="password" placeholder="Confirm password" className="w-full p-2  border rounded" />
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" className="w-full text-white p-2 rounded">
+          <Button size="large" type="primary" htmlType="submit" className="w-full text-white p-2 rounded">
             Register
           </Button>
           <div className="text-center mt-4">
@@ -89,6 +85,6 @@ export default function RegisterPage({ params: { lang } }: Props) {
           </div>
         </Form.Item>
       </Form>
-    </div>
+    </>
   );
 }

@@ -63,7 +63,7 @@ const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }
         const cards = JSON.parse(values.cards);
         createOrEditCard({ ...values, cards });
       } catch (error) {
-        message.error(t("Invalid json format, don't forget keys and values must be enclosed in double quotes!"));
+        message.error(t("invalid-json-format-dont-forget-keys-and-values-must-be-enclosed-in-double-quotes"));
         return;
       }
     } else {
@@ -78,7 +78,7 @@ const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }
 
   const confirmRemove = () => {
     modal.confirm({
-      title: t("Are you sure you want to delete"),
+      title: t("are-you-sure-you-want-to-delete"),
       okText: t("yes"),
       onOk() {
         deleteCard(openBool.data);
@@ -95,18 +95,18 @@ const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }
   }, [openBool, boxes]);
 
   return (
-    <Modal open={openBool.value} onClose={cancel} onCancel={cancel} title={openBool.data ? t("Edit card") : t("Create new card")} footer={null}>
+    <Modal open={openBool.value} onClose={cancel} onCancel={cancel} title={openBool.data ? t("edit-card") : t("create-new-card")} footer={null}>
       {contextHolder}
 
       <Form form={form} name="add-card" onFinish={onFinish} layout="vertical">
         {boxes?.length && (
           <Form.Item
             name="boxId"
-            label={t("Box")}
+            label={t("box")}
             rules={[
               {
                 required: true,
-                message: "Box is required!",
+                message: t("box-is-required"),
               },
             ]}
           >
@@ -125,11 +125,11 @@ const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }
             rules={[
               {
                 required: true,
-                message: "List is required!",
+                message: t("list-is-required"),
               },
             ]}
             name="cards"
-            label={t("Cards list like json")}
+            label={t("cards-list-like-json")}
           >
             <Input.TextArea placeholder={`[\n\t{ "front": "Front text 1", "back": "Back text 1" },\n\t{ "front": "Front text 2", "back": "Back text 2" },\n\t...\n]`} rows={9} />
           </Form.Item>
@@ -140,11 +140,11 @@ const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }
               rules={[
                 {
                   required: true,
-                  message: "Front is required!",
+                  message: t("front-is-required"),
                 },
               ]}
               name="front"
-              label={t("Front")}
+              label={t("front")}
             >
               <Input.TextArea autoSize={{ minRows: 3 }} />
             </Form.Item>
@@ -152,11 +152,11 @@ const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }
               rules={[
                 {
                   required: true,
-                  message: "Back is required!",
+                  message: t("back-is-required"),
                 },
               ]}
               name="back"
-              label={t("Back")}
+              label={t("back")}
             >
               <Input.TextArea autoSize={{ minRows: 3 }} />
             </Form.Item>
@@ -171,7 +171,7 @@ const AddEditCardModal = ({ openBool, t, boxes, categoryId, inPlayPage = false }
               </Button>
             ) : (
               <Space>
-                <Typography.Text type="secondary">Upload list</Typography.Text>
+                <Typography.Text type="secondary">{t("upload-list")}</Typography.Text>
                 <Switch checked={isJsonUploadBool.value} onChange={isJsonUploadBool.onToggle} />
               </Space>
             )}{" "}

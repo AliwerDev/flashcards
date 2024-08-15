@@ -91,7 +91,7 @@ const Page = ({ params: { lang, categoryId } }: IProps) => {
 
   const startButton = (
     <Button onClick={() => router.push(paths.dashboard.play(lang, categoryId))} disabled={active_cards.length <= 0} className="w-full" size="large" type="primary" icon={<LuPlay />}>
-      {t("Start learning")}
+      {t("start-learning")}
     </Button>
   );
 

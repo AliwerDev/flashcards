@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Form, Input, Button, theme, Divider, message } from "antd";
+import { Form, Input, Button, Divider, message } from "antd";
 import { LuUser, LuLock } from "react-icons/lu";
 import Link from "next/link";
 import { paths } from "@/src/routes/paths";
@@ -17,10 +17,6 @@ export default function LoginPage({ params: { lang } }: Props) {
   const { t } = useTranslation(lang);
   const { login, loginByGoogle } = useAuthContext();
   const loadingBool = useBoolean();
-
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
 
   const onFinish = (values: any) => {
     loadingBool.onTrue();
@@ -54,7 +50,7 @@ export default function LoginPage({ params: { lang } }: Props) {
   });
 
   return (
-    <div style={{ background: colorBgContainer, borderRadius: borderRadiusLG }} className="w-full max-w-md p-8 shadow-md">
+    <>
       <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
       <Form name="login" className="login-form" onFinish={onFinish}>
         <Form.Item
@@ -66,7 +62,7 @@ export default function LoginPage({ params: { lang } }: Props) {
             },
           ]}
         >
-          <Input prefix={<LuUser />} placeholder="Email" type="email" className="w-full p-2 border rounded" />
+          <Input size="large" prefix={<LuUser />} placeholder="Email" type="email" className="w-full p-2 border rounded" />
         </Form.Item>
 
         <Form.Item
@@ -78,11 +74,11 @@ export default function LoginPage({ params: { lang } }: Props) {
             },
           ]}
         >
-          <Input prefix={<LuLock />} type="password" placeholder="Password" className="w-full p-2 border rounded" />
+          <Input size="large" prefix={<LuLock />} type="password" placeholder="Password" className="w-full p-2 border rounded" />
         </Form.Item>
 
         <Form.Item>
-          <Button loading={loadingBool.value} type="primary" htmlType="submit" className="w-full text-white p-2 rounded">
+          <Button size="large" loading={loadingBool.value} type="primary" htmlType="submit" className="w-full text-white p-2 rounded">
             {t("Log in")}
           </Button>
           <div className="text-center mt-4">
@@ -98,9 +94,9 @@ export default function LoginPage({ params: { lang } }: Props) {
         {t("or")}
       </Divider>
 
-      <Button onClick={() => loginWithgoogle()} type="dashed" size="large" icon={<img src="/assets/icons/ic_google.svg" width="20px" height="20px" alt="google" />} className="w-full !bg-white dark:!bg-inherit mb-2">
+      <Button size="large" onClick={() => loginWithgoogle()} type="dashed" icon={<img src="/assets/icons/ic_google.svg" width="20px" height="20px" alt="google" />} className="w-full !bg-white dark:!bg-inherit mb-2">
         {t("Continue with Google")}
       </Button>
-    </div>
+    </>
   );
 }

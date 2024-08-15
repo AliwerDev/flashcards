@@ -11,7 +11,10 @@ const Page = ({ params: { lang } }: { params: { lang: string } }) => {
   const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: () => axiosInstance.get(endpoints.category.list) });
 
   useEffect(() => {
-    if (get(categories, "data.length") > 0) {
+    const path = localStorage.getItem("lastpath");
+    if (path) {
+      router.push(path);
+    } else if (get(categories, "data.length") > 0) {
       router.push(paths.dashboard.main(lang, get(categories, "data[0]._id")));
     }
   }, [categories]);
